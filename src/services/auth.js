@@ -7,7 +7,7 @@ const getApiUrl = () => {
 
 // In your auth service file
 const API_BASE_URL = getApiUrl();
-console.log('API_BASE_URL:', API_BASE_URL); // Should show your Vercel URL, not localhost
+ // Should show your Vercel URL, not localhost
 // In your auth service or any component
 // console.log('All env vars:', process.env);
 // console.log('API URL:', process.env.REACT_APP_API_URL);
