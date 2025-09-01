@@ -109,7 +109,7 @@ const Navbar = ({ onMenuClick }) => {
           }}
         >
           <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
-            Logo
+            laura
           </Link>
         </Typography>
 
