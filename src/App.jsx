@@ -1,4 +1,4 @@
-﻿import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { QuizProvider } from './contexts/QuizContext.jsx';
 import { CustomThemeProvider } from './contexts/ThemeContext.jsx';
@@ -7,7 +7,6 @@ import Home from './pages/Home.jsx';
 import Login from './components/auth/Login.jsx';
 import Register from './components/auth/Register.jsx';
 import AdminDashboard from './components/admin/AdminDashboard.jsx';
-import UserDashboard from './components/user/UserDashboard.jsx';
 import Quiz from './components/user/Quiz.jsx';
 import Results from './components/user/Results.jsx';
 import TestHistory from './components/user/TestHistory.jsx';
@@ -20,6 +19,7 @@ import TakeQuiz from './components/user/TakeQuiz.jsx';
 import ViewResult from './components/user/ViewResult.jsx';
 import Unauthorized from './pages/Unauthorized.jsx';
 import Profile from './components/common/Profile.jsx';
+import QuizDetail from './components/user/QuizDetail.jsx';
 import './App.css';
 
 function App() {
@@ -64,11 +64,7 @@ function App() {
                   } />
 
                   {/* User Routes - ONLY for user role */}
-                  <Route path="/user" element={
-                    <ProtectedRoute role="user">
-                      <UserDashboard />
-                    </ProtectedRoute>
-                  } />
+
                   <Route path="/user/quiz" element={
                     <ProtectedRoute role="user">
                       <Quiz />
@@ -84,6 +80,13 @@ function App() {
                       <MockQuiz />
                     </ProtectedRoute>
                   } />
+
+                  <Route path="/user/quiz-detail" element={
+                    <ProtectedRoute role="user">
+                      <QuizDetail />
+                    </ProtectedRoute>
+                  } />
+
                   <Route path="/user/view-result" element={
                     <ProtectedRoute role="user">
                       <ViewResult />
