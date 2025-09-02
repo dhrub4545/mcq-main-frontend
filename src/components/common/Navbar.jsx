@@ -34,24 +34,24 @@ const Navbar = ({ onMenuClick }) => {
   console.log('Navbar rendered with user:', user);
 
   const handleLogout = () => {
-    console.log('Logout clicked');
+    // console.log('Logout clicked');
     logout();
     navigate('/login');
     setAnchorEl(null);
   };
 
   const handleMenuClick = (event) => {
-    console.log('Account circle clicked, opening menu');
+    // console.log('Account circle clicked, opening menu');
     setAnchorEl(event.currentTarget);
   };
 
   const handleMenuClose = () => {
-    console.log('Menu closed');
+    // console.log('Menu closed');
     setAnchorEl(null);
   };
 
   const handleProfileClick = () => {
-    console.log('Profile clicked - navigating to /profile');
+    // console.log('Profile clicked - navigating to /profile');
     navigate('/profile');
     setAnchorEl(null);
   };
@@ -75,7 +75,7 @@ const Navbar = ({ onMenuClick }) => {
             aria-label="open drawer"
             edge="start"
             onClick={() => {
-              console.log('Hamburger menu clicked');
+              // console.log('Hamburger menu clicked');
               onMenuClick && onMenuClick();
             }}
             sx={{ 
@@ -117,7 +117,7 @@ const Navbar = ({ onMenuClick }) => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <IconButton 
             onClick={() => {
-              console.log('Theme toggle clicked');
+              // console.log('Theme toggle clicked');
               toggleColorMode();
             }}
             sx={{ color: 'text.primary' }}
