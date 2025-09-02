@@ -18,14 +18,27 @@ import {
   Paper,
   Alert,
   CircularProgress,
-  Container
+  Container,
+  Fade,
+  Grow,
+  useTheme,
+  IconButton,
+  Divider,
+  Slider,
+  ButtonGroup
 } from '@mui/material';
 import {
   Timer as TimerIcon,
   ArrowBack as ArrowBackIcon,
   ArrowForward as ArrowForwardIcon,
   Send as SendIcon,
-  Warning as WarningIcon
+  Warning as WarningIcon,
+  Add as AddIcon,
+  Remove as RemoveIcon,
+  Quiz as QuizIcon,
+  Psychology as PsychologyIcon,
+  School as SchoolIcon,
+  Speed as SpeedIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
@@ -37,6 +50,7 @@ const getApiUrl = () => {
 const API_URL = getApiUrl();
 
 const MockQuiz = () => {
+  const theme = useTheme();
   const [quizConfig, setQuizConfig] = useState({
     topic: '',
     difficulty: 'medium',
@@ -47,7 +61,7 @@ const MockQuiz = () => {
   const [answers, setAnswers] = useState({});
   const [selectedAnswer, setSelectedAnswer] = useState('');
 
-  // Timer states - Initialize to null to prevent immediate submission
+  // Timer states
   const [timeLeft, setTimeLeft] = useState(null);
   const [isTimeWarning, setIsTimeWarning] = useState(false);
   const [timerStarted, setTimerStarted] = useState(false);
@@ -61,26 +75,23 @@ const MockQuiz = () => {
   // Initialize timer only when quiz data is available
   useEffect(() => {
     if (quizStarted && questions.length > 0 && !timerStarted) {
-      const totalTimeInSeconds = questions.length * 60; // 1 minute per question
+      const totalTimeInSeconds = questions.length * 60;
       setTimeLeft(totalTimeInSeconds);
       setTimerStarted(true);
     }
   }, [quizStarted, questions, timerStarted]);
 
-  // Timer countdown effect - only runs when timer is properly initialized
+  // Timer countdown effect
   useEffect(() => {
-    // Don't start countdown until timeLeft is properly set
     if (timeLeft === null || timeLeft === undefined || !timerStarted || !quizStarted) {
       return;
     }
 
-    // Handle time up
     if (timeLeft <= 0) {
       handleTimeUp();
       return;
     }
 
-    // Show warning when 2 minutes or less remaining
     if (timeLeft <= 120) {
       setIsTimeWarning(true);
     } else {
@@ -92,7 +103,6 @@ const MockQuiz = () => {
         if (prev > 1) {
           return prev - 1;
         } else {
-          // Time's up, clear interval and trigger submission
           clearInterval(timer);
           return 0;
         }
@@ -108,7 +118,6 @@ const MockQuiz = () => {
   }, [currentQuestionIndex, answers]);
 
   const handleTimeUp = () => {
-    // Auto-submit when time runs out
     handleSubmit(true);
   };
 
@@ -118,6 +127,27 @@ const MockQuiz = () => {
     const remainingSeconds = seconds % 60;
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
+
+  // Enhanced number input handlers for mobile
+  const handleQuestionCountChange = (newValue) => {
+    const count = Math.min(20, Math.max(1, newValue));
+    setQuizConfig({ ...quizConfig, questionCount: count });
+  };
+
+  const incrementQuestions = () => {
+    if (quizConfig.questionCount < 20) {
+      handleQuestionCountChange(quizConfig.questionCount + 1);
+    }
+  };
+
+  const decrementQuestions = () => {
+    if (quizConfig.questionCount > 1) {
+      handleQuestionCountChange(quizConfig.questionCount - 1);
+    }
+  };
+
+  // Quick selection for common question counts
+  const quickSelectCounts = [5, 10, 15, 20];
 
   const fetchWikipedia = async (topic) => {
     const endpoint = "https://en.wikipedia.org/w/api.php";
@@ -169,15 +199,13 @@ Only return a valid JSON array, no other text or markdown.`;
       setLoading(true);
       setError('');
       
-      // Fetch Wikipedia context
       let wikiContext = '';
       try {
         wikiContext = await fetchWikipedia(quizConfig.topic);
       } catch (wikiError) {
-        // console.log("Proceeding without Wikipedia context", wikiError);
+        // Continue without Wikipedia context
       }
 
-      // Build prompt for AI
       const prompt = buildPrompt(
         quizConfig.topic,
         quizConfig.difficulty,
@@ -185,7 +213,6 @@ Only return a valid JSON array, no other text or markdown.`;
         wikiContext.startsWith('Error') ? null : wikiContext
       );
 
-      // Generate questions using the same API as CreateQuiz - Updated to use environment variable
       const response = await fetch(`${API_URL}/api/generate-mcqs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -199,7 +226,6 @@ Only return a valid JSON array, no other text or markdown.`;
                        Array.isArray(result?.mcqs) ? result.mcqs : 
                        [];
 
-      // Format questions for the quiz
       const formattedQuestions = generatedQuestions.map(q => ({
         question: q[0] || 'No question text',
         options: Array.isArray(q[1]) ? q[1] : ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
@@ -207,13 +233,9 @@ Only return a valid JSON array, no other text or markdown.`;
       }));
 
       setQuestions(formattedQuestions);
-      
-      // Initialize answers object and selected answer
       setAnswers({});
       setSelectedAnswer('');
       setCurrentQuestionIndex(0);
-      
-      // Start the quiz (timer will be initialized by useEffect)
       setQuizStarted(true);
     } catch (err) {
       setError('Failed to generate questions. Please try again.');
@@ -228,7 +250,6 @@ Only return a valid JSON array, no other text or markdown.`;
   };
 
   const handleNext = () => {
-    // Save current answer
     setAnswers(prev => ({
       ...prev,
       [currentQuestionIndex]: selectedAnswer
@@ -236,15 +257,12 @@ Only return a valid JSON array, no other text or markdown.`;
 
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
-      // selectedAnswer will be updated by useEffect
     } else {
-      // Submit quiz
       handleSubmit();
     }
   };
 
   const handlePrevious = () => {
-    // Save current answer
     setAnswers(prev => ({
       ...prev,
       [currentQuestionIndex]: selectedAnswer
@@ -252,12 +270,11 @@ Only return a valid JSON array, no other text or markdown.`;
 
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
-      // selectedAnswer will be updated by useEffect
     }
   };
 
   const handleSubmit = async (isTimeUp = false) => {
-    if (submitting) return; // Prevent double submission
+    if (submitting) return;
     
     try {
       setSubmitting(true);
@@ -265,7 +282,6 @@ Only return a valid JSON array, no other text or markdown.`;
       
       const finalAnswers = { ...answers, [currentQuestionIndex]: selectedAnswer };
 
-      // Calculate score and create detailed answers
       let correctCount = 0;
       const detailedAnswers = questions.map((question, index) => {
         const userAnswer = finalAnswers[index];
@@ -292,7 +308,6 @@ Only return a valid JSON array, no other text or markdown.`;
         timeUp: isTimeUp
       };
 
-      // Save to server history (same as TakeQuiz) - Updated to use environment variable
       const user = JSON.parse(localStorage.getItem('quizUser') || '{}');
       const token = user.token;
 
@@ -309,15 +324,12 @@ Only return a valid JSON array, no other text or markdown.`;
 
           if (!response.ok) {
             console.error('Failed to save mock quiz to history');
-            // Continue to results page even if saving fails
           }
         } catch (saveError) {
           console.error('Error saving mock quiz to history:', saveError);
-          // Continue to results page even if saving fails
         }
       }
 
-      // Navigate to results page
       navigate('/user/view-result', { state: { results } });
     } catch (error) {
       console.error('Error submitting mock quiz:', error);
@@ -340,83 +352,343 @@ Only return a valid JSON array, no other text or markdown.`;
     setSubmitting(false);
   };
 
+  const getDifficultyColor = (difficulty) => {
+    switch (difficulty) {
+      case 'easy': return '#4caf50';
+      case 'medium': return '#ff9800';
+      case 'hard': return '#f44336';
+      default: return '#2196f3';
+    }
+  };
+
   if (!quizStarted) {
     return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-          <Typography variant="h4" gutterBottom fontWeight="bold">
-            Create Mock Quiz
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            Generate AI-powered quiz questions on any topic and save to your history
-          </Typography>
+      <Container maxWidth="md" sx={{ py: { xs: 2, sm: 4 } }}>
+        <Fade in timeout={600}>
+          <Paper 
+            elevation={0}
+            sx={{ 
+              p: { xs: 3, sm: 5 }, 
+              borderRadius: 4,
+              background: theme.palette.mode === 'dark'
+                ? 'linear-gradient(135deg, rgba(30,30,30,0.95) 0%, rgba(45,45,45,0.95) 100%)'
+                : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
+              backdropFilter: 'blur(20px)',
+              border: `1px solid ${theme.palette.mode === 'dark' 
+                ? 'rgba(255,255,255,0.1)' 
+                : 'rgba(0,0,0,0.1)'}`,
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Background Pattern */}
+            <Box sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              opacity: theme.palette.mode === 'dark' ? 0.02 : 0.03,
+              background: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.4'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+              zIndex: 0
+            }} />
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          <Box component="form" sx={{ mb: 4 }}>
-            <TextField
-              fullWidth
-              label="Topic"
-              placeholder="e.g., JavaScript, World History, Biology"
-              value={quizConfig.topic}
-              onChange={(e) => setQuizConfig({...quizConfig, topic: e.target.value})}
-              sx={{ mb: 2 }}
-              required
-            />
-
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel>Difficulty</InputLabel>
-              <Select
-                value={quizConfig.difficulty}
-                onChange={(e) => setQuizConfig({...quizConfig, difficulty: e.target.value})}
-                label="Difficulty"
+            <Box sx={{ position: 'relative', zIndex: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <PsychologyIcon sx={{ 
+                  fontSize: 40, 
+                  mr: 2,
+                  background: theme.palette.mode === 'dark'
+                    ? 'linear-gradient(45deg, #bb86fc 30%, #03dac6 90%)'
+                    : 'linear-gradient(45deg, #6366f1 30%, #8b5cf6 90%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }} />
+                <Typography 
+                  variant="h3" 
+                  sx={{
+                    fontWeight: 700,
+                    background: theme.palette.mode === 'dark'
+                      ? 'linear-gradient(45deg, #bb86fc 30%, #03dac6 90%)'
+                      : 'linear-gradient(45deg, #6366f1 30%, #8b5cf6 90%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
+                  }}
+                >
+                  Create Mock Quiz
+                </Typography>
+              </Box>
+              
+              <Typography 
+                variant="h6" 
+                color="text.secondary" 
+                sx={{ mb: 4, fontSize: { xs: '1rem', sm: '1.25rem' } }}
               >
-                <MenuItem value="easy">Easy</MenuItem>
-                <MenuItem value="medium">Medium</MenuItem>
-                <MenuItem value="hard">Hard</MenuItem>
-              </Select>
-            </FormControl>
+                Generate AI-powered quiz questions on any topic and save to your history
+              </Typography>
 
-            <TextField
-              fullWidth
-              label="Number of Questions"
-              type="number"
-              inputProps={{ min: 1, max: 20 }}
-              value={quizConfig.questionCount}
-              onChange={(e) => setQuizConfig({
-                ...quizConfig,
-                questionCount: Math.min(20, Math.max(1, parseInt(e.target.value) || 5))
-              })}
-              sx={{ mb: 3 }}
-            />
+              {error && (
+                <Fade in>
+                  <Alert 
+                    severity="error" 
+                    sx={{ 
+                      mb: 3,
+                      background: theme.palette.mode === 'dark'
+                        ? 'rgba(244, 67, 54, 0.1)'
+                        : 'rgba(244, 67, 54, 0.05)',
+                      border: `1px solid ${theme.palette.mode === 'dark'
+                        ? 'rgba(244, 67, 54, 0.3)'
+                        : 'rgba(244, 67, 54, 0.2)'}`,
+                      borderRadius: 2
+                    }}
+                  >
+                    {error}
+                  </Alert>
+                </Fade>
+              )}
 
-            <Button
-              variant="contained"
-              onClick={handleStartQuiz}
-              disabled={loading || !quizConfig.topic.trim()}
-              size="large"
-              fullWidth
-              sx={{ py: 1.5, fontSize: '1.1rem' }}
-            >
-              {loading ? <CircularProgress size={24} /> : 'Start Mock Quiz'}
-            </Button>
-          </Box>
-        </Paper>
+              <Box component="form" sx={{ mb: 4 }}>
+                {/* Enhanced Topic Input */}
+                <Grow in timeout={800} style={{ transitionDelay: '200ms' }}>
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, display: 'flex', alignItems: 'center' }}>
+                      <SchoolIcon sx={{ mr: 1, color: '#673ab7' }} />
+                      Topic
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      placeholder="e.g., JavaScript, World History, Biology, Machine Learning"
+                      value={quizConfig.topic}
+                      onChange={(e) => setQuizConfig({...quizConfig, topic: e.target.value})}
+                      required
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          fontSize: { xs: '1rem', sm: '1.1rem' },
+                          padding: { xs: '12px', sm: '16px' }
+                        }
+                      }}
+                    />
+                  </Box>
+                </Grow>
+
+                {/* Enhanced Difficulty Select */}
+                <Grow in timeout={800} style={{ transitionDelay: '400ms' }}>
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, display: 'flex', alignItems: 'center' }}>
+                      <SpeedIcon sx={{ mr: 1, color: getDifficultyColor(quizConfig.difficulty) }} />
+                      Difficulty Level
+                    </Typography>
+                    <FormControl fullWidth>
+                      <Select
+                        value={quizConfig.difficulty}
+                        onChange={(e) => setQuizConfig({...quizConfig, difficulty: e.target.value})}
+                        sx={{
+                          borderRadius: 2,
+                          fontSize: { xs: '1rem', sm: '1.1rem' }
+                        }}
+                      >
+                        <MenuItem value="easy">
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#4caf50', mr: 1 }} />
+                            Easy
+                          </Box>
+                        </MenuItem>
+                        <MenuItem value="medium">
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#ff9800', mr: 1 }} />
+                            Medium
+                          </Box>
+                        </MenuItem>
+                        <MenuItem value="hard">
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#f44336', mr: 1 }} />
+                            Hard
+                          </Box>
+                        </MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+                </Grow>
+
+                {/* Enhanced Number Input with Mobile Optimization */}
+                <Grow in timeout={800} style={{ transitionDelay: '600ms' }}>
+                  <Box sx={{ mb: 4 }}>
+                    <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center' }}>
+                      <QuizIcon sx={{ mr: 1, color: '#2196f3' }} />
+                      Number of Questions
+                    </Typography>
+
+                    {/* Mobile-Optimized Number Input */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      {/* Counter with +/- buttons for mobile */}
+                      <Card 
+                        variant="outlined" 
+                        sx={{ 
+                          p: 2, 
+                          borderRadius: 2,
+                          background: theme.palette.mode === 'dark'
+                            ? 'rgba(255,255,255,0.02)'
+                            : 'rgba(0,0,0,0.01)'
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <IconButton 
+                            onClick={decrementQuestions}
+                            disabled={quizConfig.questionCount <= 1}
+                            sx={{ 
+                              bgcolor: 'primary.main',
+                              color: 'white',
+                              width: { xs: 48, sm: 40 },
+                              height: { xs: 48, sm: 40 },
+                              '&:hover': { bgcolor: 'primary.dark' },
+                              '&:disabled': { bgcolor: 'action.disabled' }
+                            }}
+                          >
+                            <RemoveIcon />
+                          </IconButton>
+                          
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mx: 2 }}>
+                            <Typography 
+                              variant="h4" 
+                              sx={{ 
+                                fontWeight: 700,
+                                fontSize: { xs: '2rem', sm: '2.5rem' },
+                                color: 'primary.main'
+                              }}
+                            >
+                              {quizConfig.questionCount}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              Questions
+                            </Typography>
+                          </Box>
+                          
+                          <IconButton 
+                            onClick={incrementQuestions}
+                            disabled={quizConfig.questionCount >= 20}
+                            sx={{ 
+                              bgcolor: 'primary.main',
+                              color: 'white',
+                              width: { xs: 48, sm: 40 },
+                              height: { xs: 48, sm: 40 },
+                              '&:hover': { bgcolor: 'primary.dark' },
+                              '&:disabled': { bgcolor: 'action.disabled' }
+                            }}
+                          >
+                            <AddIcon />
+                          </IconButton>
+                        </Box>
+                      </Card>
+
+                      {/* Quick Selection Chips */}
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ width: '100%', textAlign: 'center', mb: 1 }}>
+                          Quick Select:
+                        </Typography>
+                        {quickSelectCounts.map((count) => (
+                          <Chip
+                            key={count}
+                            label={`${count} Questions`}
+                            onClick={() => handleQuestionCountChange(count)}
+                            color={quizConfig.questionCount === count ? "primary" : "default"}
+                            variant={quizConfig.questionCount === count ? "filled" : "outlined"}
+                            sx={{ 
+                              fontWeight: 600,
+                              fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                              height: { xs: 36, sm: 32 }
+                            }}
+                          />
+                        ))}
+                      </Box>
+
+                      {/* Slider for Desktop */}
+                      <Box sx={{ display: { xs: 'none', md: 'block' }, px: 2 }}>
+                        <Slider
+                          value={quizConfig.questionCount}
+                          onChange={(e, newValue) => handleQuestionCountChange(newValue)}
+                          min={1}
+                          max={20}
+                          marks
+                          step={1}
+                          valueLabelDisplay="auto"
+                          sx={{ mt: 2 }}
+                        />
+                      </Box>
+                    </Box>
+                  </Box>
+                </Grow>
+
+                {/* Enhanced Start Button */}
+                <Grow in timeout={800} style={{ transitionDelay: '800ms' }}>
+                  <Button
+                    variant="contained"
+                    onClick={handleStartQuiz}
+                    disabled={loading || !quizConfig.topic.trim()}
+                    size="large"
+                    fullWidth
+                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <PsychologyIcon />}
+                    sx={{
+                      py: { xs: 2, sm: 1.5 },
+                      fontSize: { xs: '1.1rem', sm: '1.2rem' },
+                      fontWeight: 700,
+                      textTransform: 'none',
+                      borderRadius: 3,
+                      background: 'linear-gradient(45deg, #ff4081 30%, #f50057 90%)',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      '&:hover': {
+                        background: 'linear-gradient(45deg, #f50057 30%, #c51162 90%)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: theme.palette.mode === 'dark'
+                          ? '0 8px 25px rgba(255, 64, 129, 0.4)'
+                          : '0 8px 25px rgba(255, 64, 129, 0.35)',
+                      },
+                      '&:disabled': {
+                        background: 'rgba(0,0,0,0.12)',
+                        transform: 'none'
+                      }
+                    }}
+                  >
+                    {loading ? 'Generating Questions...' : 'Start Mock Quiz'}
+                  </Button>
+                </Grow>
+              </Box>
+            </Box>
+          </Paper>
+        </Fade>
       </Container>
     );
   }
 
-  // Don't render until quiz data is loaded and timer is initialized
+  // Loading state
   if (!questions.length || timeLeft === null) {
     return (
       <Container maxWidth="md" sx={{ py: 4 }}>
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
-          <CircularProgress size={60} />
-          <Typography variant="h6" sx={{ ml: 2 }}>Loading quiz...</Typography>
+        <Box 
+          display="flex" 
+          flexDirection="column"
+          justifyContent="center" 
+          alignItems="center" 
+          minHeight="70vh"
+          sx={{
+            background: theme.palette.mode === 'dark' 
+              ? 'linear-gradient(135deg, rgba(18,18,18,0.9) 0%, rgba(30,30,30,0.9) 100%)'
+              : 'linear-gradient(135deg, rgba(248,250,252,0.9) 0%, rgba(243,244,246,0.9) 100%)',
+            borderRadius: 3,
+            p: 4,
+            backdropFilter: 'blur(20px)',
+            border: `1px solid ${theme.palette.mode === 'dark' 
+              ? 'rgba(255,255,255,0.1)' 
+              : 'rgba(0,0,0,0.1)'}`
+          }}
+        >
+          <CircularProgress size={60} sx={{ mb: 3 }} />
+          <Typography variant="h5" sx={{ color: 'text.primary', fontWeight: 600 }}>
+            Loading quiz...
+          </Typography>
         </Box>
       </Container>
     );
@@ -426,131 +698,353 @@ Only return a valid JSON array, no other text or markdown.`;
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      {/* Timer and Progress Header */}
-      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h4" fontWeight="bold">
-            Mock Quiz: {quizConfig.topic}
-          </Typography>
-          <Box display="flex" alignItems="center" gap={2}>
-            <Chip
-              icon={<TimerIcon />}
-              label={formatTime(timeLeft)}
-              color={isTimeWarning ? "error" : "primary"}
-              sx={{ fontSize: '1.1rem', px: 1 }}
-            />
-            {isTimeWarning && (
-              <Chip
-                icon={<WarningIcon />}
-                label="Time Warning!"
-                color="error"
-                variant="outlined"
-              />
-            )}
-          </Box>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-          <Chip label={quizConfig.topic} size="small" />
-          <Chip label={quizConfig.difficulty} size="small" color="secondary" />
-          <Chip label="Mock Quiz" size="small" color="info" />
-        </Box>
-        <Typography variant="body1" color="text.secondary" gutterBottom>
-          Question {currentQuestionIndex + 1} of {questions.length}
-        </Typography>
-        <LinearProgress variant="determinate" value={progress} sx={{ height: 8, borderRadius: 4 }} />
-      </Paper>
+    <Container maxWidth="md" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 3 } }}>
+      {/* Enhanced Timer and Progress Header */}
+      <Fade in timeout={600}>
+        <Paper 
+          elevation={0}
+          sx={{ 
+            p: { xs: 2, md: 3 }, 
+            mb: 3,
+            background: theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(30,30,30,0.95) 0%, rgba(45,45,45,0.95) 100%)'
+              : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
+            backdropFilter: 'blur(20px)',
+            border: `1px solid ${theme.palette.mode === 'dark' 
+              ? 'rgba(255,255,255,0.1)' 
+              : 'rgba(0,0,0,0.1)'}`,
+            borderRadius: 3,
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          <Box sx={{ position: 'relative', zIndex: 1 }}>
+            <Box 
+              display="flex" 
+              justifyContent="space-between" 
+              alignItems="center" 
+              mb={2}
+              flexDirection={{ xs: 'column', sm: 'row' }}
+              gap={{ xs: 2, sm: 0 }}
+            >
+              <Typography 
+                variant="h4" 
+                sx={{
+                  fontWeight: 700,
+                  background: theme.palette.mode === 'dark'
+                    ? 'linear-gradient(45deg, #bb86fc 30%, #03dac6 90%)'
+                    : 'linear-gradient(45deg, #6366f1 30%, #8b5cf6 90%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
+                  textAlign: { xs: 'center', sm: 'left' }
+                }}
+              >
+                Mock Quiz: {quizConfig.topic}
+              </Typography>
+              
+              <Box 
+                display="flex" 
+                alignItems="center" 
+                gap={1}
+                flexDirection={{ xs: 'row', sm: 'row' }}
+                flexWrap="wrap"
+                justifyContent={{ xs: 'center', sm: 'flex-end' }}
+              >
+                <Chip
+                  icon={<TimerIcon />}
+                  label={formatTime(timeLeft)}
+                  color={isTimeWarning ? "error" : "primary"}
+                  sx={{ 
+                    fontSize: { xs: '0.9rem', sm: '1.1rem' }, 
+                    px: { xs: 0.5, sm: 1 },
+                    height: { xs: 28, sm: 32 }
+                  }}
+                />
+                {isTimeWarning && (
+                  <Chip
+                    icon={<WarningIcon />}
+                    label="Warning!"
+                    color="error"
+                    variant="outlined"
+                    sx={{ 
+                      fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                      height: { xs: 28, sm: 32 }
+                    }}
+                  />
+                )}
+              </Box>
+            </Box>
 
-      {/* Time up warning */}
+            <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap', justifyContent: { xs: 'center', sm: 'flex-start' } }}>
+              <Chip label={quizConfig.topic} size="small" color="primary" />
+              <Chip label={quizConfig.difficulty} size="small" sx={{ color: getDifficultyColor(quizConfig.difficulty) }} />
+              <Chip label="Mock Quiz" size="small" color="info" />
+            </Box>
+
+            <Typography 
+              variant="body1" 
+              color="text.secondary" 
+              gutterBottom
+              sx={{ 
+                fontSize: { xs: '0.9rem', sm: '1rem' },
+                textAlign: { xs: 'center', sm: 'left' }
+              }}
+            >
+              Question {currentQuestionIndex + 1} of {questions.length}
+            </Typography>
+            
+            <LinearProgress 
+              variant="determinate" 
+              value={progress} 
+              sx={{ 
+                height: { xs: 6, sm: 8 }, 
+                borderRadius: 4,
+                background: theme.palette.mode === 'dark' 
+                  ? 'rgba(255,255,255,0.1)' 
+                  : 'rgba(0,0,0,0.1)',
+                '& .MuiLinearProgress-bar': {
+                  background: 'linear-gradient(45deg, #ff4081 30%, #f50057 90%)',
+                  borderRadius: 4
+                }
+              }} 
+            />
+          </Box>
+        </Paper>
+      </Fade>
+
+      {/* Enhanced Time Warning */}
       {isTimeWarning && (
-        <Alert severity="warning" sx={{ mb: 3 }}>
-          Less than 2 minutes remaining! The quiz will auto-submit when time runs out.
-        </Alert>
+        <Fade in timeout={300}>
+          <Alert 
+            severity="warning" 
+            sx={{ 
+              mb: 3,
+              background: theme.palette.mode === 'dark'
+                ? 'rgba(255, 193, 7, 0.1)'
+                : 'rgba(255, 193, 7, 0.05)',
+              border: `1px solid ${theme.palette.mode === 'dark'
+                ? 'rgba(255, 193, 7, 0.3)'
+                : 'rgba(255, 193, 7, 0.2)'}`,
+              borderRadius: 2,
+              fontSize: { xs: '0.875rem', sm: '1rem' }
+            }}
+          >
+            Less than 2 minutes remaining! The quiz will auto-submit when time runs out.
+          </Alert>
+        </Fade>
       )}
 
-      <Card elevation={3}>
-        <CardContent sx={{ p: 4 }}>
-          <Typography variant="h6" gutterBottom sx={{ mb: 3, minHeight: '3rem' }}>
-            {currentQuestion.question}
-          </Typography>
+      {/* Enhanced Question Card */}
+      <Grow in timeout={800} style={{ transitionDelay: '200ms' }}>
+        <Card 
+          elevation={0}
+          sx={{
+            background: theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(30,30,30,0.95) 0%, rgba(45,45,45,0.95) 100%)'
+              : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
+            backdropFilter: 'blur(20px)',
+            border: `1px solid ${theme.palette.mode === 'dark' 
+              ? 'rgba(255,255,255,0.1)' 
+              : 'rgba(0,0,0,0.1)'}`,
+            borderRadius: 3,
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          <CardContent sx={{ p: { xs: 3, sm: 4, md: 5 }, position: 'relative', zIndex: 1 }}>
+            <Typography 
+              variant="h5" 
+              gutterBottom 
+              sx={{ 
+                mb: 4, 
+                minHeight: { xs: 'auto', sm: '3rem' },
+                fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                fontWeight: 600,
+                lineHeight: 1.4,
+                color: 'text.primary'
+              }}
+            >
+              {currentQuestion.question}
+            </Typography>
 
-          <RadioGroup
-            value={selectedAnswer}
-            onChange={handleAnswerChange}
-          >
-            {currentQuestion.options.map((option, index) => (
-              <Card 
-                key={index}
-                variant="outlined"
-                sx={{ 
-                  mb: 1,
-                  borderRadius: 2,
-                  borderColor: selectedAnswer === option ? 'primary.main' : 'divider',
-                  bgcolor: selectedAnswer === option ? 'primary.light' : 'background.paper',
+            <Divider sx={{ mb: 3, opacity: 0.3 }} />
+
+            <RadioGroup
+              value={selectedAnswer}
+              onChange={handleAnswerChange}
+              sx={{ gap: 1 }}
+            >
+              {currentQuestion.options.map((option, index) => (
+                <Card 
+                  key={index}
+                  variant="outlined"
+                  sx={{ 
+                    mb: 1,
+                    borderRadius: 2,
+                    borderColor: selectedAnswer === option ? 'primary.main' : theme.palette.mode === 'dark' 
+                      ? 'rgba(255,255,255,0.1)' 
+                      : 'rgba(0,0,0,0.1)',
+                    bgcolor: selectedAnswer === option 
+                      ? theme.palette.mode === 'dark' 
+                        ? 'rgba(187, 134, 252, 0.08)' 
+                        : 'rgba(99, 102, 241, 0.08)'
+                      : 'transparent',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      borderColor: theme.palette.mode === 'dark' ? '#bb86fc' : '#6366f1',
+                      backgroundColor: theme.palette.mode === 'dark'
+                        ? 'rgba(187, 134, 252, 0.05)'
+                        : 'rgba(99, 102, 241, 0.05)',
+                      transform: 'translateX(4px)'
+                    }
+                  }}
+                >
+                  <FormControlLabel
+                    value={option}
+                    control={
+                      <Radio 
+                        sx={{
+                          color: theme.palette.mode === 'dark' ? '#bb86fc' : '#6366f1',
+                          '&.Mui-checked': {
+                            color: theme.palette.mode === 'dark' ? '#bb86fc' : '#6366f1',
+                          }
+                        }}
+                      />
+                    }
+                    label={
+                      <Typography 
+                        sx={{ 
+                          fontSize: { xs: '0.9rem', sm: '1rem' },
+                          fontWeight: 500,
+                          color: 'text.primary'
+                        }}
+                      >
+                        {option}
+                      </Typography>
+                    }
+                    sx={{ 
+                      width: '100%',
+                      m: 0,
+                      p: { xs: 1.5, sm: 2 }
+                    }}
+                  />
+                </Card>
+              ))}
+            </RadioGroup>
+
+            {error && (
+              <Fade in>
+                <Alert 
+                  severity="error" 
+                  sx={{ 
+                    mt: 2,
+                    background: theme.palette.mode === 'dark'
+                      ? 'rgba(244, 67, 54, 0.1)'
+                      : 'rgba(244, 67, 54, 0.05)',
+                    border: `1px solid ${theme.palette.mode === 'dark'
+                      ? 'rgba(244, 67, 54, 0.3)'
+                      : 'rgba(244, 67, 54, 0.2)'}`,
+                    borderRadius: 2
+                  }}
+                >
+                  {error}
+                </Alert>
+              </Fade>
+            )}
+
+            <Divider sx={{ mt: 4, mb: 3, opacity: 0.3 }} />
+
+            {/* Enhanced Button Section */}
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between',
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: { xs: 2, sm: 0 },
+                alignItems: { xs: 'stretch', sm: 'center' }
+              }}
+            >
+              <Box 
+                display="flex" 
+                gap={1}
+                flexDirection={{ xs: 'row', sm: 'row' }}
+                justifyContent={{ xs: 'space-between', sm: 'flex-start' }}
+              >
+                <Button
+                  variant="outlined"
+                  onClick={resetQuiz}
+                  startIcon={<ArrowBackIcon />}
+                  disabled={submitting}
+                  sx={{
+                    fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                    px: { xs: 2, sm: 3 },
+                    borderColor: theme.palette.mode === 'dark' ? '#f44336' : '#f44336',
+                    color: theme.palette.mode === 'dark' ? '#f44336' : '#f44336',
+                    '&:hover': {
+                      borderColor: '#d32f2f',
+                      backgroundColor: 'rgba(244, 67, 54, 0.08)',
+                    }
+                  }}
+                >
+                  Setup
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={handlePrevious}
+                  disabled={currentQuestionIndex === 0 || submitting}
+                  startIcon={<ArrowBackIcon />}
+                  sx={{
+                    fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                    px: { xs: 2, sm: 3 }
+                  }}
+                >
+                  Previous
+                </Button>
+              </Box>
+              
+              <Button
+                variant="contained"
+                onClick={handleNext}
+                disabled={!selectedAnswer || submitting}
+                endIcon={
+                  submitting ? <CircularProgress size={16} color="inherit" /> :
+                  currentQuestionIndex === questions.length - 1 ? <SendIcon /> : <ArrowForwardIcon />
+                }
+                sx={{
+                  background: currentQuestionIndex === questions.length - 1 
+                    ? 'linear-gradient(45deg, #4caf50 30%, #2e7d32 90%)'
+                    : 'linear-gradient(45deg, #ff4081 30%, #f50057 90%)',
+                  minWidth: { xs: '100%', sm: 160 },
+                  py: { xs: 1.5, sm: 1 },
+                  fontSize: { xs: '1rem', sm: '0.9rem' },
+                  fontWeight: 700,
+                  textTransform: 'none',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                    background: currentQuestionIndex === questions.length - 1 
+                      ? 'linear-gradient(45deg, #2e7d32 30%, #1b5e20 90%)'
+                      : 'linear-gradient(45deg, #f50057 30%, #c51162 90%)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: theme.palette.mode === 'dark'
+                      ? '0 8px 25px rgba(255, 64, 129, 0.4)'
+                      : '0 8px 25px rgba(255, 64, 129, 0.35)',
+                  },
+                  '&:disabled': {
+                    background: 'rgba(0,0,0,0.12)',
+                    color: 'rgba(0,0,0,0.26)',
+                    transform: 'none'
                   }
                 }}
               >
-                <FormControlLabel
-                  value={option}
-                  control={<Radio color="primary" />}
-                  label={
-                    <Typography variant="body1">
-                      {option}
-                    </Typography>
-                  }
-                  sx={{ 
-                    width: '100%',
-                    m: 0,
-                    p: 1.5
-                  }}
-                />
-              </Card>
-            ))}
-          </RadioGroup>
-
-          {error && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
-            <Box display="flex" gap={2}>
-              <Button
-                variant="outlined"
-                onClick={resetQuiz}
-                startIcon={<ArrowBackIcon />}
-                disabled={submitting}
-              >
-                Back to Setup
-              </Button>
-              <Button
-                variant="outlined"
-                onClick={handlePrevious}
-                disabled={currentQuestionIndex === 0 || submitting}
-                startIcon={<ArrowBackIcon />}
-              >
-                Previous
+                {submitting ? 'Submitting...' :
+                 currentQuestionIndex === questions.length - 1 ? 'Submit Quiz' : 'Next Question'}
               </Button>
             </Box>
-            <Button
-              variant="contained"
-              onClick={handleNext}
-              disabled={!selectedAnswer || submitting}
-              color={currentQuestionIndex === questions.length - 1 ? "success" : "primary"}
-              endIcon={
-                submitting ? <CircularProgress size={16} /> :
-                currentQuestionIndex === questions.length - 1 ? <SendIcon /> : <ArrowForwardIcon />
-              }
-            >
-              {submitting ? 'Submitting...' :
-               currentQuestionIndex === questions.length - 1 ? 'Submit Quiz' : 'Next Question'}
-            </Button>
-          </Box>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </Grow>
     </Container>
   );
 };
