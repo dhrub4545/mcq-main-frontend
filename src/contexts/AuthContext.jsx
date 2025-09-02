@@ -61,8 +61,8 @@ export const AuthProvider = ({ children }) => {
         error: null
       });
       
-      // Redirect based on role
-      navigate(user.isAdmin ? '/admin' : '/user', { replace: true });
+      // Redirect based on role - users go to home, admin goes to admin dashboard
+      navigate(user.isAdmin ? '/admin' : '/', { replace: true });
       
       return true;
     } catch (error) {
