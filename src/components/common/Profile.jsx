@@ -45,17 +45,17 @@ const Profile = ({ onClose }) => {
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
 
   // Add debugging
-  console.log('Profile component rendering...', { user });
+  // console.log('Profile component rendering...', { user });
 
   useEffect(() => {
-    console.log('Profile component mounted');
-    console.log('User data:', user);
+    // console.log('Profile component mounted');
+    // console.log('User data:', user);
     return () => console.log('Profile component unmounted');
   }, [user]);
 
   // Check if user exists, if not show loading or error
   if (!user) {
-    console.log('No user found in Profile component');
+    // console.log('No user found in Profile component');
     return (
       <Box sx={{ width: '100%', maxWidth: 600, mx: 'auto', p: 2 }}>
         <Alert severity="error">
@@ -111,7 +111,7 @@ const Profile = ({ onClose }) => {
       setLoading(true);
       setError('');
       
-      console.log('Updating user info...', { userInfo, token: user.token });
+      // console.log('Updating user info...', { userInfo, token: user.token });
       
       // Updated API call to use environment variable
       const response = await fetch(`${API_URL}/api/auth/update-profile`, {
@@ -126,10 +126,10 @@ const Profile = ({ onClose }) => {
         })
       });
 
-      console.log('Update response status:', response.status);
+      // console.log('Update response status:', response.status);
       if (response.ok) {
         const data = await response.json();
-        console.log('Update successful:', data);
+        // console.log('Update successful:', data);
         setSuccess('Profile updated successfully!');
         setEditMode(false);
         
@@ -172,7 +172,7 @@ const Profile = ({ onClose }) => {
         return;
       }
 
-      console.log('Changing password...');
+      // console.log('Changing password...');
       
       // Updated API call to use environment variable
       const response = await fetch(`${API_URL}/api/auth/change-password`, {
@@ -187,7 +187,7 @@ const Profile = ({ onClose }) => {
         })
       });
 
-      console.log('Password change response status:', response.status);
+      // console.log('Password change response status:', response.status);
       if (response.ok) {
         setSuccess('Password changed successfully!');
         setPasswordDialogOpen(false);
@@ -226,7 +226,7 @@ const Profile = ({ onClose }) => {
     return username ? username.charAt(0).toUpperCase() : 'U';
   };
 
-  console.log('Profile component rendering UI...', { userInfo });
+  // console.log('Profile component rendering UI...', { userInfo });
 
   return (
     <Box sx={{ width: '100%', maxWidth: 600, mx: 'auto', p: 2 }}>

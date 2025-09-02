@@ -31,7 +31,7 @@ const Navbar = ({ onMenuClick }) => {
   const open = Boolean(anchorEl);
 
   // Add debugging
-  console.log('Navbar rendered with user:', user);
+  // console.log('Navbar rendered with user:', user);
 
   const handleLogout = () => {
     // console.log('Logout clicked');

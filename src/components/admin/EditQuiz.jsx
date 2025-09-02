@@ -39,7 +39,7 @@ const API_URL = getApiUrl();
 
 const EditQuiz = () => {
   const { id } = useParams(); // Get quiz ID from URL params
-  console.log(id);
+  // console.log(id);
   const navigate = useNavigate();
   const [quizData, setQuizData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -283,7 +283,7 @@ Only return a valid JSON array, no other text or markdown.`;
           setShowWikipedia(true);
         }
       } catch (wikiError) {
-        console.log("Proceeding without Wikipedia context", wikiError);
+        // console.log("Proceeding without Wikipedia context", wikiError);
       }
 
       const prompt = buildPrompt(

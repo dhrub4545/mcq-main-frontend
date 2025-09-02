@@ -174,7 +174,7 @@ Only return a valid JSON array, no other text or markdown.`;
       try {
         wikiContext = await fetchWikipedia(quizConfig.topic);
       } catch (wikiError) {
-        console.log("Proceeding without Wikipedia context", wikiError);
+        // console.log("Proceeding without Wikipedia context", wikiError);
       }
 
       // Build prompt for AI

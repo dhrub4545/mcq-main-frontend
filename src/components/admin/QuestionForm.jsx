@@ -56,7 +56,7 @@ const QuestionForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // In a real app, this would send the question to the backend
-    console.log('Question submitted:', question);
+    // console.log('Question submitted:', question);
     alert('Question added successfully (mock)');
     setQuestion({
       text: '',

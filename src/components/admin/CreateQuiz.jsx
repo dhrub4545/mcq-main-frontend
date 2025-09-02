@@ -102,7 +102,7 @@ Only return a valid JSON array, no other text or markdown.`;
           setShowWikipedia(true);
         }
       } catch (wikiError) {
-        console.log("Proceeding without Wikipedia context", wikiError);
+        // console.log("Proceeding without Wikipedia context", wikiError);
       }
 
       const prompt = buildPrompt(

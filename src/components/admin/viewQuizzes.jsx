@@ -63,7 +63,7 @@ const ViewQuizzes = () => {
           return;
         }
         
-        console.log('Fetching quizzes with token:', user.token.substring(0, 20) + '...');
+        // console.log('Fetching quizzes with token:', user.token.substring(0, 20) + '...');
         
         // Updated API call to use environment variable
         const response = await fetch(`${API_URL}/api/quizzes`, {
@@ -73,7 +73,7 @@ const ViewQuizzes = () => {
           }
         });
         
-        console.log('Response status:', response.status);
+        // console.log('Response status:', response.status);
         
         if (!response.ok) {
           if (response.status === 401) {
@@ -85,7 +85,7 @@ const ViewQuizzes = () => {
         }
         
         const data = await response.json();
-        console.log('Quizzes data:', data);
+        // console.log('Quizzes data:', data);
         setQuizzes(data.quizzes || []);
       } catch (err) {
         console.error('Error fetching quizzes:', err);
