@@ -455,7 +455,12 @@ const Layout = ({ children }) => {
                 color: '#ff4081'
               }}
             >
-              laura
+              <Box
+                component="img"
+                src={logo}
+                alt="Logo"
+                sx={{ height: 60, width: 'auto', verticalAlign: 'middle' }}
+              />
             </Typography>
             <IconButton onClick={toggleColorMode} sx={{ color: 'text.primary' }}>
               {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
