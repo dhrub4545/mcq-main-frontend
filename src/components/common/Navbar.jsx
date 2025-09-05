@@ -31,6 +31,7 @@ const Navbar = ({ onMenuClick }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
+
   // Add debugging
   // console.log('Navbar rendered with user:', user);
 
