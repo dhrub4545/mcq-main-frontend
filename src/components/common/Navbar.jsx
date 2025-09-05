@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useThemeMode } from '../../contexts/ThemeContext.jsx';
+import logo from '../../assets/images/logo.png';
 import { 
   AppBar, 
   Toolbar, 
@@ -91,7 +92,7 @@ const Navbar = ({ onMenuClick }) => {
         {!user && (
           <Typography variant="h6" component="div" sx={{ color: 'text.primary' }}>
             <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
-              <img src="assets/images/logo.png" alt="Logo" />
+              <img src={logo} alt="Logo" />
             </Link>
           </Typography>
         )}
@@ -109,7 +110,7 @@ const Navbar = ({ onMenuClick }) => {
           }}
         >
           <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
-            <img src="assets/images/logo.png" alt="Logo" />
+            <img src={logo} alt="Logo" />
           </Link>
         </Typography>
 
