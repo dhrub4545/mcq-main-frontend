@@ -454,7 +454,7 @@ const Layout = ({ children }) => {
                 color: '#ff4081'
               }}
             >
-              Logo
+              laura
             </Typography>
             <IconButton onClick={toggleColorMode} sx={{ color: 'text.primary' }}>
               {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
