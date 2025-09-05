@@ -109,7 +109,7 @@ const Navbar = ({ onMenuClick }) => {
           }}
         >
           <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
-            Quiz App
+            <img src="assets/images/logo.png" alt="Logo" />
           </Link>
         </Typography>
 
