@@ -35,7 +35,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useThemeMode } from '../../contexts/ThemeContext';
-import Navbar from './Navbar'; // Import your Navbar component
+import Navbar from './Navbar';
 
 // API URL configuration for environment support
 const getApiUrl = () => {
@@ -43,8 +43,7 @@ const getApiUrl = () => {
 };
 
 const API_URL = getApiUrl();
-
-const drawerWidth = 260; // Increased width for better spacing
+const drawerWidth = 260;
 
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
@@ -72,7 +71,6 @@ const Layout = ({ children }) => {
         const token = userToken.token;
         if (!token) return;
 
-        // Updated API call to use environment variable
         const response = await fetch(`${API_URL}/api/quizzes/public`, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -239,7 +237,7 @@ const Layout = ({ children }) => {
             <ListItem key={index} disablePadding>
               <ListItemButton
                 onClick={() => {
-                  navigate('/user/quiz-detail', { state: { quiz } }); // Pass quiz data
+                  navigate('/user/quiz-detail', { state: { quiz } });
                   if (isMobile) setMobileOpen(false);
                 }}
                 sx={{
@@ -434,7 +432,13 @@ const Layout = ({ children }) => {
   // Return children only if no user (for login/register pages)
   if (!user) {
     return (
-      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        width: '100vw', 
+        overflowX: 'hidden' 
+      }}>
         <AppBar
           position="static"
           elevation={0}
@@ -467,7 +471,15 @@ const Layout = ({ children }) => {
             </IconButton>
           </Toolbar>
         </AppBar>
-        <Box sx={{ flexGrow: 1, p: 3 }}>
+        <Box
+          sx={{
+            flexGrow: 1,
+            p: 3,
+            width: '100vw',
+            maxWidth: '100vw',
+            overflowX: 'hidden'
+          }}
+        >
           {children}
         </Box>
       </Box>
@@ -475,7 +487,12 @@ const Layout = ({ children }) => {
   }
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
+    <Box sx={{ 
+      display: 'flex', 
+      minHeight: '100vh', 
+      width: '100vw', 
+      overflowX: 'hidden' 
+    }}>
       {/* Sidebar */}
       <Drawer
         variant="temporary"
@@ -514,18 +531,22 @@ const Layout = ({ children }) => {
         flexGrow: 1,
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
-        overflow: 'hidden'
+        minHeight: '100vh',
+        width: '100vw',
+        bgcolor: 'background.default',
+        overflowX: 'hidden'
       }}>
-        {/* USE YOUR NAVBAR COMPONENT INSTEAD OF CUSTOM APPBAR */}
         <Navbar onMenuClick={handleDrawerToggle} />
 
-        {/* Main content */}
         <Box sx={{
           flexGrow: 1,
-          p: 3,
-          overflow: 'auto',
-          bgcolor: 'background.default'
+          px: { xs: 0, sm: 3 },
+          pt: 3,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          width: '100%',
+          maxWidth: '100vw',
+          mx: 'auto'
         }}>
           {children}
         </Box>
