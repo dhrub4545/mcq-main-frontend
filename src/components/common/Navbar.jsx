@@ -91,7 +91,7 @@ const Navbar = ({ onMenuClick }) => {
         {!user && (
           <Typography variant="h6" component="div" sx={{ color: 'text.primary' }}>
             <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
-              Quiz App
+              <img src="assets/images/logo.png" alt="Logo" />
             </Link>
           </Typography>
         )}
