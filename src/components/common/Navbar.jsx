@@ -92,7 +92,7 @@ const Navbar = ({ onMenuClick }) => {
         {!user && (
           <Typography variant="h6" component="div" sx={{ color: 'text.primary' }}>
             <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
-              <img src={logo} alt="Logo" />
+              <img src={logo} alt="Logo" style={{ width: '120px', height: 'auto' }} />
             </Link>
           </Typography>
         )}
@@ -110,7 +110,7 @@ const Navbar = ({ onMenuClick }) => {
           }}
         >
           <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
-            <img src={logo} alt="Logo" />
+            <img src={logo} alt="Logo" style={{ width: '120px', height: 'auto' }} />
           </Link>
         </Typography>
 
