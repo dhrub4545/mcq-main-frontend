@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useThemeMode } from '../../contexts/ThemeContext.jsx';
-import logo from '../../assests/images/logo.png';
+import logo from '../../assests/images/logo2.png';
 import { 
   AppBar, 
   Toolbar, 
