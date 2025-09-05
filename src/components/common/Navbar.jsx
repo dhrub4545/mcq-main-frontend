@@ -88,7 +88,7 @@ const Navbar = ({ onMenuClick }) => {
                 component="img"
                 src={logo}
                 alt="Logo"
-                sx={{ height: 60, width: 'auto', verticalAlign: 'middle' }}
+                sx={{ height: 65, width: 'auto', verticalAlign: 'middle' }}
               />
             </Link>
           </Typography>
@@ -110,7 +110,7 @@ const Navbar = ({ onMenuClick }) => {
               component="img"
               src={logo}
               alt="Logo"
-              sx={{ height: 60, width: 'auto', verticalAlign: 'middle' }}
+              sx={{ height: 65, width: 'auto', verticalAlign: 'middle' }}
             />
           </Link>
         </Typography>
