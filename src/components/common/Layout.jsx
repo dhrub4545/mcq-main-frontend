@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logo from '../../assests/images/logo.png';
 import {
   Box,
   Drawer,
