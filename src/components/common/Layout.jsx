@@ -52,6 +52,7 @@ const Layout = ({ children }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [recentQuizzes, setRecentQuizzes] = useState([]);
+  const [sidebarScrolled, setSidebarScrolled] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -60,6 +61,12 @@ const Layout = ({ children }) => {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  // Handle sidebar scroll detection
+  const handleSidebarScroll = (e) => {
+    const scrollTop = e.target.scrollTop;
+    setSidebarScrolled(scrollTop > 20);
   };
 
   // Fetch recent quizzes from database (only for users)
@@ -168,43 +175,104 @@ const Layout = ({ children }) => {
     </Box>
   );
 
-  // Enhanced User Sidebar Content - Consolidated Navigation
+  // Enhanced User Sidebar Content - With Scroll Effects
   const UserSidebar = (
-    <Box sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100vh',
-      overflow: 'auto',
-      bgcolor: 'background.paper',
-      background: theme.palette.mode === 'dark'
-        ? 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)'
-        : 'linear-gradient(135deg, #f8f9ff 0%, #e8f0fe 100%)'
-    }}>
-      {/* User Profile Section */}
+    <Box 
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        overflow: 'auto',
+        bgcolor: 'background.paper',
+        background: theme.palette.mode === 'dark'
+          ? 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)'
+          : 'linear-gradient(135deg, #f8f9ff 0%, #e8f0fe 100%)',
+        position: 'relative',
+        '&::-webkit-scrollbar': {
+          width: '6px',
+        },
+        '&::-webkit-scrollbar-track': {
+          background: 'transparent',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          background: theme.palette.mode === 'dark' 
+            ? 'rgba(255, 255, 255, 0.2)'
+            : 'rgba(0, 0, 0, 0.2)',
+          borderRadius: '10px',
+          transition: 'all 0.3s ease',
+        },
+        '&::-webkit-scrollbar-thumb:hover': {
+          background: theme.palette.mode === 'dark' 
+            ? 'rgba(255, 255, 255, 0.4)'
+            : 'rgba(0, 0, 0, 0.4)',
+        },
+        '&::before': sidebarScrolled ? {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '20px',
+          background: theme.palette.mode === 'dark'
+            ? 'linear-gradient(to bottom, rgba(26, 26, 26, 1) 0%, rgba(26, 26, 26, 0) 100%)'
+            : 'linear-gradient(to bottom, rgba(248, 249, 255, 1) 0%, rgba(248, 249, 255, 0) 100%)',
+          zIndex: 10,
+          pointerEvents: 'none'
+        } : {},
+      }}
+      onScroll={handleSidebarScroll}
+    >
+      {/* User Profile Section - Enhanced with scroll effects */}
       <Box sx={{
         p: 3,
         borderBottom: '1px solid',
         borderColor: 'divider',
-        background: theme.palette.mode === 'dark'
-          ? 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)'
-          : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white'
+        background: sidebarScrolled 
+          ? (theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(30, 60, 114, 0.95) 0%, rgba(42, 82, 152, 0.95) 100%)'
+              : 'linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%)')
+          : (theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)'
+              : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'),
+        color: 'white',
+        backdropFilter: sidebarScrolled ? 'blur(10px)' : 'none',
+        boxShadow: sidebarScrolled 
+          ? (theme.palette.mode === 'dark'
+              ? '0 4px 20px rgba(0, 0, 0, 0.3)'
+              : '0 4px 20px rgba(102, 126, 234, 0.2)')
+          : 'none',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 5
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Avatar
             sx={{
-              width: 50,
-              height: 50,
+              width: sidebarScrolled ? 45 : 50,
+              height: sidebarScrolled ? 45 : 50,
               mr: 2,
               bgcolor: 'rgba(255,255,255,0.2)',
               fontSize: '1.5rem',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              transition: 'all 0.3s ease',
+              boxShadow: sidebarScrolled 
+                ? '0 4px 15px rgba(255, 255, 255, 0.2)'
+                : '0 2px 8px rgba(255, 255, 255, 0.1)'
             }}
           >
             {user?.username?.charAt(0)?.toUpperCase() || 'U'}
           </Avatar>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontWeight: 700, 
+                mb: 0.5,
+                fontSize: sidebarScrolled ? '1.1rem' : '1.25rem',
+                transition: 'all 0.3s ease'
+              }}
+            >
               {user?.username || 'Username'}
             </Typography>
             <Chip
@@ -214,21 +282,34 @@ const Layout = ({ children }) => {
                 bgcolor: 'rgba(255,255,255,0.2)',
                 color: 'white',
                 fontSize: '0.75rem',
-                height: '20px'
+                height: sidebarScrolled ? '18px' : '20px',
+                transition: 'all 0.3s ease'
               }}
             />
           </Box>
         </Box>
       </Box>
 
-      {/* Consolidated Navigation Section */}
-      <Box sx={{ p: 2, flexGrow: 1 }}>
+      {/* Consolidated Navigation Section - Enhanced */}
+      <Box sx={{ 
+        p: 2, 
+        flexGrow: 1,
+        background: sidebarScrolled 
+          ? (theme.palette.mode === 'dark'
+              ? 'rgba(26, 26, 26, 0.95)'
+              : 'rgba(248, 249, 255, 0.95)')
+          : 'transparent',
+        backdropFilter: sidebarScrolled ? 'blur(10px)' : 'none',
+        transition: 'all 0.3s ease'
+      }}>
         <Typography variant="subtitle2" sx={{
           fontWeight: 600,
           mb: 3,
           color: 'text.secondary',
           textTransform: 'uppercase',
-          letterSpacing: 1
+          letterSpacing: 1,
+          opacity: sidebarScrolled ? 0.8 : 1,
+          transition: 'all 0.3s ease'
         }}>
           Navigation
         </Typography>
@@ -245,6 +326,12 @@ const Layout = ({ children }) => {
                 borderRadius: 2,
                 py: 1.5,
                 px: 2,
+                backdropFilter: sidebarScrolled ? 'blur(5px)' : 'none',
+                background: sidebarScrolled 
+                  ? (theme.palette.mode === 'dark'
+                      ? 'rgba(255, 255, 255, 0.02)'
+                      : 'rgba(0, 0, 0, 0.02)')
+                  : 'transparent',
                 '&:hover': {
                   bgcolor: theme.palette.mode === 'dark'
                     ? 'rgba(103, 58, 183, 0.1)'
@@ -253,7 +340,8 @@ const Layout = ({ children }) => {
                   boxShadow: theme.palette.mode === 'dark'
                     ? '0 4px 20px rgba(103, 58, 183, 0.3)'
                     : '0 4px 20px rgba(103, 58, 183, 0.15)',
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(10px)'
                 }
               }}
             >
@@ -281,6 +369,12 @@ const Layout = ({ children }) => {
                 borderRadius: 2,
                 py: 1.5,
                 px: 2,
+                backdropFilter: sidebarScrolled ? 'blur(5px)' : 'none',
+                background: sidebarScrolled 
+                  ? (theme.palette.mode === 'dark'
+                      ? 'rgba(255, 255, 255, 0.02)'
+                      : 'rgba(0, 0, 0, 0.02)')
+                  : 'transparent',
                 '&:hover': {
                   bgcolor: theme.palette.mode === 'dark'
                     ? 'rgba(255, 152, 0, 0.1)'
@@ -289,7 +383,8 @@ const Layout = ({ children }) => {
                   boxShadow: theme.palette.mode === 'dark'
                     ? '0 4px 20px rgba(255, 152, 0, 0.3)'
                     : '0 4px 20px rgba(255, 152, 0, 0.15)',
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(10px)'
                 }
               }}
             >
@@ -313,6 +408,12 @@ const Layout = ({ children }) => {
                 borderRadius: 2,
                 py: 1.5,
                 px: 2,
+                backdropFilter: sidebarScrolled ? 'blur(5px)' : 'none',
+                background: sidebarScrolled 
+                  ? (theme.palette.mode === 'dark'
+                      ? 'rgba(255, 255, 255, 0.02)'
+                      : 'rgba(0, 0, 0, 0.02)')
+                  : 'transparent',
                 '&:hover': {
                   bgcolor: theme.palette.mode === 'dark'
                     ? 'rgba(76, 175, 80, 0.1)'
@@ -321,7 +422,8 @@ const Layout = ({ children }) => {
                   boxShadow: theme.palette.mode === 'dark'
                     ? '0 4px 20px rgba(76, 175, 80, 0.3)'
                     : '0 4px 20px rgba(76, 175, 80, 0.15)',
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(10px)'
                 }
               }}
             >
@@ -338,15 +440,25 @@ const Layout = ({ children }) => {
             </ListItemButton>
           </ListItem>
 
-          <Divider sx={{ my: 2 }} />
+          <Divider sx={{ 
+            my: 2,
+            background: sidebarScrolled 
+              ? (theme.palette.mode === 'dark'
+                  ? 'rgba(255, 255, 255, 0.1)'
+                  : 'rgba(0, 0, 0, 0.1)')
+              : undefined,
+            transition: 'all 0.3s ease'
+          }} />
 
-          {/* Recent Quizzes Section - Consolidated into navigation */}
+          {/* Recent Quizzes Section - Enhanced */}
           <Typography variant="body2" sx={{
             fontWeight: 600,
             mb: 2,
             color: 'text.secondary',
             display: 'flex',
-            alignItems: 'center'
+            alignItems: 'center',
+            opacity: sidebarScrolled ? 0.9 : 1,
+            transition: 'all 0.3s ease'
           }}>
             <NewIcon sx={{ color: '#ff4081', mr: 1, fontSize: '1.2rem' }} />
             Recent Quizzes
@@ -364,10 +476,16 @@ const Layout = ({ children }) => {
                   py: 1,
                   px: 2,
                   ml: 2,
+                  background: sidebarScrolled 
+                    ? (theme.palette.mode === 'dark'
+                        ? 'rgba(255, 255, 255, 0.02)'
+                        : 'rgba(0, 0, 0, 0.02)')
+                    : 'transparent',
                   '&:hover': {
                     bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
                     transform: 'translateX(4px)',
-                    transition: 'all 0.2s ease'
+                    transition: 'all 0.2s ease',
+                    backdropFilter: 'blur(5px)'
                   }
                 }}
               >
@@ -376,7 +494,9 @@ const Layout = ({ children }) => {
                     width: 6,
                     height: 6,
                     borderRadius: '50%',
-                    bgcolor: '#4caf50'
+                    bgcolor: '#4caf50',
+                    boxShadow: sidebarScrolled ? '0 0 8px rgba(76, 175, 80, 0.4)' : 'none',
+                    transition: 'all 0.3s ease'
                   }} />
                 </ListItemIcon>
                 <ListItemText
@@ -393,14 +513,23 @@ const Layout = ({ children }) => {
         </List>
       </Box>
 
-      {/* Sign Out - Fixed at bottom */}
+      {/* Sign Out - Enhanced with scroll effects */}
       <Box sx={{
         p: 2,
         borderTop: '1px solid',
         borderColor: 'divider',
-        background: theme.palette.mode === 'dark'
-          ? 'rgba(244, 67, 54, 0.05)'
-          : 'rgba(244, 67, 54, 0.02)'
+        background: sidebarScrolled 
+          ? (theme.palette.mode === 'dark'
+              ? 'rgba(244, 67, 54, 0.08)'
+              : 'rgba(244, 67, 54, 0.05)')
+          : (theme.palette.mode === 'dark'
+              ? 'rgba(244, 67, 54, 0.05)'
+              : 'rgba(244, 67, 54, 0.02)'),
+        backdropFilter: sidebarScrolled ? 'blur(10px)' : 'none',
+        transition: 'all 0.3s ease',
+        position: 'sticky',
+        bottom: 0,
+        zIndex: 5
       }}>
         <ListItemButton
           onClick={handleLogout}
@@ -411,7 +540,9 @@ const Layout = ({ children }) => {
             '&:hover': {
               bgcolor: 'rgba(244, 67, 54, 0.1)',
               transform: 'translateY(-1px)',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 4px 15px rgba(244, 67, 54, 0.2)'
             }
           }}
         >
@@ -494,7 +625,7 @@ const Layout = ({ children }) => {
     <Box sx={{ 
       display: 'flex', 
       minHeight: '100vh',
-      position: 'relative' // Added this
+      position: 'relative'
     }}>
       {/* Mobile Sidebar */}
       <Drawer
@@ -509,7 +640,7 @@ const Layout = ({ children }) => {
           '& .MuiDrawer-paper': {
             boxSizing: 'border-box',
             width: drawerWidth,
-            position: 'fixed', // Ensure mobile drawer is fixed
+            position: 'fixed',
             height: '100vh',
             top: 0,
             left: 0,
@@ -528,7 +659,7 @@ const Layout = ({ children }) => {
           '& .MuiDrawer-paper': {
             boxSizing: 'border-box',
             width: drawerWidth,
-            position: 'fixed', // Changed from 'relative' to 'fixed'
+            position: 'fixed',
             height: '100vh',
             top: 0,
             left: 0,
@@ -548,8 +679,8 @@ const Layout = ({ children }) => {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        marginLeft: { xs: 0, sm: `${drawerWidth}px` }, // Add left margin for desktop
-        width: { xs: '100vw', sm: `calc(100vw - ${drawerWidth}px)` }, // Adjust width
+        marginLeft: { xs: 0, sm: `${drawerWidth}px` },
+        width: { xs: '100vw', sm: `calc(100vw - ${drawerWidth}px)` },
         bgcolor: 'background.default'
       }}>
         <Navbar onMenuClick={handleDrawerToggle} />
@@ -558,9 +689,9 @@ const Layout = ({ children }) => {
           px: { xs: 2, sm: 3 },
           pt: 3,
           pb: 3,
-          overflowY: 'auto', // Only vertical scroll for content
+          overflowY: 'auto',
           overflowX: 'hidden',
-          height: 'calc(100vh - 64px)', // Subtract navbar height
+          height: 'calc(100vh - 64px)',
           width: '100%'
         }}>
           {children}
