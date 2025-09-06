@@ -90,7 +90,14 @@ const TestHistory = () => {
       }
 
       const data = await response.json();
-      setTestResults(data.results || []);
+      
+      // Sort results by date in descending order (newest first)
+      const sortedResults = (data.results || []).sort((a, b) => {
+        return new Date(b.date) - new Date(a.date);
+      });
+      
+      setTestResults(sortedResults);
+
     } catch (err) {
       console.error('Error loading test results:', err);
       setError(err.message || 'Failed to load test results');
@@ -182,6 +189,7 @@ const TestHistory = () => {
 
   const regularQuizzes = testResults.filter(result => !isMockQuiz(result.quizName));
   const mockQuizzes = testResults.filter(result => isMockQuiz(result.quizName));
+
   const heatmapData = prepareHeatmapData();
   const regularProgressData = prepareProgressData(regularQuizzes);
   const mockProgressData = prepareProgressData(mockQuizzes);
@@ -439,13 +447,11 @@ const TestHistory = () => {
                       <stop offset="100%" stopColor={color} stopOpacity={0.1} />
                     </linearGradient>
                   </defs>
-
                   <CartesianGrid
                     strokeDasharray="5 5"
                     stroke={theme.palette.divider}
                     strokeOpacity={0.5}
                   />
-
                   <XAxis
                     dataKey="date"
                     axisLine={false}
@@ -457,7 +463,6 @@ const TestHistory = () => {
                     }}
                     interval="preserveStartEnd"
                   />
-
                   <YAxis
                     domain={[0, 100]}
                     axisLine={false}
@@ -469,7 +474,6 @@ const TestHistory = () => {
                     }}
                     tickFormatter={(value) => `${value}%`}
                   />
-
                   <RechartsTooltip
                     contentStyle={{
                       backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.95)' : 'rgba(255, 255, 255, 0.98)',
@@ -500,7 +504,6 @@ const TestHistory = () => {
                       return label;
                     }}
                   />
-
                   <Area
                     type="monotone"
                     dataKey="score"
@@ -532,9 +535,6 @@ const TestHistory = () => {
       </CardContent>
     </Card>
   );
-
-
-
 
   // Centralized and Equal-Sized Statistics Component
   const StatsCard = ({ title, value, subtitle, icon: Icon, color, bgColor }) => (
@@ -759,7 +759,6 @@ const TestHistory = () => {
             >
               Performance Analytics
             </Typography>
-
             {/* Wider Container for Charts */}
             <Grid container spacing={4} justifyContent="center">
               <Grid item xs={12} md={6} sx={{ maxWidth: { md: 650 } }}>
@@ -780,8 +779,6 @@ const TestHistory = () => {
               </Grid>
             </Grid>
           </Box>
-
-
 
           {/* Enhanced Activity Heatmap */}
           <Paper sx={{
@@ -887,10 +884,9 @@ const TestHistory = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {testResults.slice(-10).reverse().map((result) => {
+                    {testResults.slice(0, 10).map((result) => {
                       const scorePercent = Math.round((result.score / result.total) * 100);
                       const isAccepted = scorePercent >= 70;
-
                       return (
                         <TableRow
                           key={result._id}
