@@ -493,11 +493,10 @@ const Layout = ({ children }) => {
   return (
     <Box sx={{ 
       display: 'flex', 
-      minHeight: '100vh', 
-      width: '100vw', 
-      overflowX: 'hidden' 
+      minHeight: '100vh',
+      position: 'relative' // Added this
     }}>
-      {/* Sidebar */}
+      {/* Mobile Sidebar */}
       <Drawer
         variant="temporary"
         open={mobileOpen}
@@ -509,12 +508,19 @@ const Layout = ({ children }) => {
           display: { xs: 'block', sm: 'none' },
           '& .MuiDrawer-paper': {
             boxSizing: 'border-box',
-            width: drawerWidth
+            width: drawerWidth,
+            position: 'fixed', // Ensure mobile drawer is fixed
+            height: '100vh',
+            top: 0,
+            left: 0,
+            zIndex: 1300
           },
         }}
       >
         {drawer}
       </Drawer>
+
+      {/* Desktop Sidebar - FIXED POSITION */}
       <Drawer
         variant="permanent"
         sx={{
@@ -522,33 +528,40 @@ const Layout = ({ children }) => {
           '& .MuiDrawer-paper': {
             boxSizing: 'border-box',
             width: drawerWidth,
-            position: 'relative'
+            position: 'fixed', // Changed from 'relative' to 'fixed'
+            height: '100vh',
+            top: 0,
+            left: 0,
+            zIndex: 1200,
+            borderRight: '1px solid',
+            borderColor: 'divider'
           },
         }}
         open
       >
         {drawer}
       </Drawer>
-      {/* Main content area */}
+
+      {/* Main content area - ADJUSTED FOR FIXED SIDEBAR */}
       <Box sx={{
         flexGrow: 1,
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        width: '100vw',
-        bgcolor: 'background.default',
-        overflowX: 'hidden'
+        marginLeft: { xs: 0, sm: `${drawerWidth}px` }, // Add left margin for desktop
+        width: { xs: '100vw', sm: `calc(100vw - ${drawerWidth}px)` }, // Adjust width
+        bgcolor: 'background.default'
       }}>
         <Navbar onMenuClick={handleDrawerToggle} />
         <Box sx={{
           flexGrow: 1,
-          px: { xs: 0, sm: 3 },
+          px: { xs: 2, sm: 3 },
           pt: 3,
-          overflowY: 'auto',
+          pb: 3,
+          overflowY: 'auto', // Only vertical scroll for content
           overflowX: 'hidden',
-          width: '100%',
-          maxWidth: '100vw',
-          mx: 'auto'
+          height: 'calc(100vh - 64px)', // Subtract navbar height
+          width: '100%'
         }}>
           {children}
         </Box>
