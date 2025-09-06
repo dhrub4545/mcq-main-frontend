@@ -41,7 +41,6 @@ import Navbar from './Navbar';
 const getApiUrl = () => {
   return import.meta.env.VITE_API_URL || 'http://localhost:5000';
 };
-
 const API_URL = getApiUrl();
 const drawerWidth = 260;
 
@@ -143,7 +142,6 @@ const Layout = ({ children }) => {
           </ListItem>
         </List>
       </Box>
-
       {/* Admin Info Section */}
       <Box sx={{ p: 2, flexGrow: 1 }}>
         <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
@@ -153,7 +151,6 @@ const Layout = ({ children }) => {
           Administrator
         </Typography>
       </Box>
-
       {/* Logout Section */}
       <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
         <Typography
@@ -171,7 +168,7 @@ const Layout = ({ children }) => {
     </Box>
   );
 
-  // Enhanced User Sidebar Content
+  // Enhanced User Sidebar Content - Consolidated Navigation
   const UserSidebar = (
     <Box sx={{
       display: 'flex',
@@ -224,68 +221,20 @@ const Layout = ({ children }) => {
         </Box>
       </Box>
 
-      {/* Newly Added Quiz Section */}
-      <Box sx={{ p: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <NewIcon sx={{ color: '#ff4081', mr: 1 }} />
-          <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
-            Latest Quizzes
-          </Typography>
-        </Box>
-        <List dense sx={{ bgcolor: 'background.default', borderRadius: 2, p: 1 }}>
-          {recentQuizzes.map((quiz, index) => (
-            <ListItem key={index} disablePadding>
-              <ListItemButton
-                onClick={() => {
-                  navigate('/user/quiz-detail', { state: { quiz } });
-                  if (isMobile) setMobileOpen(false);
-                }}
-                sx={{
-                  borderRadius: 1.5,
-                  mb: 0.5,
-                  '&:hover': {
-                    bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
-                    transform: 'translateX(4px)',
-                    transition: 'all 0.2s ease'
-                  }
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 35 }}>
-                  <Box sx={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    bgcolor: '#4caf50'
-                  }} />
-                </ListItemIcon>
-                <ListItemText
-                  primary={quiz.name || quiz.topic}
-                  primaryTypographyProps={{
-                    fontSize: '0.85rem',
-                    color: 'text.secondary',
-                    fontWeight: 500
-                  }}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Box>
-
-      <Divider sx={{ mx: 2 }} />
-
-      {/* Navigation Menu */}
+      {/* Consolidated Navigation Section */}
       <Box sx={{ p: 2, flexGrow: 1 }}>
         <Typography variant="subtitle2" sx={{
           fontWeight: 600,
-          mb: 2,
+          mb: 3,
           color: 'text.secondary',
           textTransform: 'uppercase',
           letterSpacing: 1
         }}>
           Navigation
         </Typography>
+        
         <List sx={{ p: 0 }}>
+          {/* Your Quizzes */}
           <ListItem disablePadding sx={{ mb: 1 }}>
             <ListItemButton
               onClick={() => {
@@ -321,6 +270,7 @@ const Layout = ({ children }) => {
             </ListItemButton>
           </ListItem>
 
+          {/* Quiz History */}
           <ListItem disablePadding sx={{ mb: 1 }}>
             <ListItemButton
               onClick={() => {
@@ -356,6 +306,7 @@ const Layout = ({ children }) => {
             </ListItemButton>
           </ListItem>
 
+          {/* Your Friends */}
           <ListItem disablePadding sx={{ mb: 1 }}>
             <ListItemButton
               sx={{
@@ -386,10 +337,63 @@ const Layout = ({ children }) => {
               />
             </ListItemButton>
           </ListItem>
+
+          <Divider sx={{ my: 2 }} />
+
+          {/* Recent Quizzes Section - Consolidated into navigation */}
+          <Typography variant="body2" sx={{
+            fontWeight: 600,
+            mb: 2,
+            color: 'text.secondary',
+            display: 'flex',
+            alignItems: 'center'
+          }}>
+            <NewIcon sx={{ color: '#ff4081', mr: 1, fontSize: '1.2rem' }} />
+            Recent Quizzes
+          </Typography>
+          
+          {recentQuizzes.map((quiz, index) => (
+            <ListItem key={index} disablePadding sx={{ mb: 0.5 }}>
+              <ListItemButton
+                onClick={() => {
+                  navigate('/user/quiz-detail', { state: { quiz } });
+                  if (isMobile) setMobileOpen(false);
+                }}
+                sx={{
+                  borderRadius: 1.5,
+                  py: 1,
+                  px: 2,
+                  ml: 2,
+                  '&:hover': {
+                    bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
+                    transform: 'translateX(4px)',
+                    transition: 'all 0.2s ease'
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 35 }}>
+                  <Box sx={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    bgcolor: '#4caf50'
+                  }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary={quiz.name || quiz.topic}
+                  primaryTypographyProps={{
+                    fontSize: '0.8rem',
+                    color: 'text.secondary',
+                    fontWeight: 500
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          ))}
         </List>
       </Box>
 
-      {/* Enhanced Logout Section */}
+      {/* Sign Out - Fixed at bottom */}
       <Box sx={{
         p: 2,
         borderTop: '1px solid',
@@ -525,7 +529,6 @@ const Layout = ({ children }) => {
       >
         {drawer}
       </Drawer>
-
       {/* Main content area */}
       <Box sx={{
         flexGrow: 1,
@@ -537,7 +540,6 @@ const Layout = ({ children }) => {
         overflowX: 'hidden'
       }}>
         <Navbar onMenuClick={handleDrawerToggle} />
-
         <Box sx={{
           flexGrow: 1,
           px: { xs: 0, sm: 3 },
