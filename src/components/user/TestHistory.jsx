@@ -23,7 +23,9 @@ import {
   useMediaQuery,
   Container,
   Stack,
-  Divider
+  Divider,
+  Pagination,
+  TableFooter
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -59,6 +61,11 @@ const TestHistory = () => {
   const [error, setError] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [resultsPerPage] = useState(10); // You can make this configurable if needed
+  
   const navigate = useNavigate();
 
   // Add theme and responsive hooks
@@ -110,6 +117,17 @@ const TestHistory = () => {
     loadResults();
   }, []);
 
+  // Calculate pagination values
+  const totalPages = Math.ceil(testResults.length / resultsPerPage);
+  const startIndex = (currentPage - 1) * resultsPerPage;
+  const endIndex = startIndex + resultsPerPage;
+  const currentResults = testResults.slice(startIndex, endIndex);
+
+  // Handle page change
+  const handlePageChange = (event, page) => {
+    setCurrentPage(page);
+  };
+
   const viewResultDetails = (result) => {
     navigate('/user/view-result', { state: { results: result } });
   };
@@ -131,6 +149,13 @@ const TestHistory = () => {
       }
 
       loadResults();
+      // Reset to first page if current page becomes empty after deletion
+      const newTotal = testResults.length - 1;
+      const newTotalPages = Math.ceil(newTotal / resultsPerPage);
+      if (currentPage > newTotalPages && newTotalPages > 0) {
+        setCurrentPage(newTotalPages);
+      }
+      
       setSnackbarMessage('Result deleted successfully');
       setSnackbarOpen(true);
     } catch (err) {
@@ -806,7 +831,7 @@ const TestHistory = () => {
             <HeatmapCalendar data={heatmapData} />
           </Paper>
 
-          {/* Enhanced Recent Activity Table */}
+          {/* Enhanced Recent Activity Table with Pagination */}
           <Paper sx={{
             borderRadius: 4,
             overflow: 'hidden',
@@ -828,11 +853,29 @@ const TestHistory = () => {
                 }}
               >
                 <AssessmentIcon sx={{ mr: 2, fontSize: 32 }} />
-                Recent Submissions
+                Quiz History
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
-                Your latest quiz attempts and performance
+                Your complete quiz history with detailed performance records
               </Typography>
+              
+              {/* Results count and pagination info */}
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                mt: 3, 
+                mb: 2,
+                flexWrap: 'wrap',
+                gap: 2
+              }}>
+                <Typography variant="body2" color="text.secondary">
+                  Showing {startIndex + 1}-{Math.min(endIndex, testResults.length)} of {testResults.length} results
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Page {currentPage} of {totalPages}
+                </Typography>
+              </Box>
             </Box>
             <Divider />
             <Box sx={{ overflowX: 'auto' }}>
@@ -845,6 +888,14 @@ const TestHistory = () => {
                         color: 'text.primary',
                         fontSize: { xs: '0.8rem', md: '0.95rem' },
                         py: 2.5,
+                        backgroundColor: theme.palette.action.hover
+                      }}>
+                        #
+                      </TableCell>
+                      <TableCell sx={{
+                        fontWeight: 700,
+                        color: 'text.primary',
+                        fontSize: { xs: '0.8rem', md: '0.95rem' },
                         backgroundColor: theme.palette.action.hover
                       }}>
                         Quiz
@@ -884,9 +935,11 @@ const TestHistory = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {testResults.slice(0, 10).map((result) => {
+                    {currentResults.map((result, index) => {
                       const scorePercent = Math.round((result.score / result.total) * 100);
                       const isAccepted = scorePercent >= 70;
+                      const globalIndex = startIndex + index + 1;
+                      
                       return (
                         <TableRow
                           key={result._id}
@@ -895,6 +948,18 @@ const TestHistory = () => {
                             transition: 'background-color 0.3s ease-in-out'
                           }}
                         >
+                          <TableCell>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: 600,
+                                color: 'text.secondary',
+                                fontSize: { xs: '0.8rem', md: '0.9rem' }
+                              }}
+                            >
+                              {globalIndex}
+                            </Typography>
+                          </TableCell>
                           <TableCell>
                             <Box>
                               <Typography
@@ -983,6 +1048,34 @@ const TestHistory = () => {
                       );
                     })}
                   </TableBody>
+                  <TableFooter>
+                    <TableRow>
+                      <TableCell colSpan={6} sx={{ border: 0, py: 0 }}>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          justifyContent: 'center', 
+                          alignItems: 'center', 
+                          py: 3,
+                          borderTop: `1px solid ${theme.palette.divider}`
+                        }}>
+                          <Pagination
+                            count={totalPages}
+                            page={currentPage}
+                            onChange={handlePageChange}
+                            color="primary"
+                            size={isMobile ? "small" : "medium"}
+                            showFirstButton
+                            showLastButton
+                            sx={{
+                              '& .MuiPaginationItem-root': {
+                                fontWeight: 600
+                              }
+                            }}
+                          />
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  </TableFooter>
                 </Table>
               </TableContainer>
             </Box>
