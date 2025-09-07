@@ -149,6 +149,7 @@ const Layout = ({ children }) => {
           </ListItem>
         </List>
       </Box>
+
       {/* Admin Info Section */}
       <Box sx={{ p: 2, flexGrow: 1 }}>
         <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
@@ -158,6 +159,7 @@ const Layout = ({ children }) => {
           Administrator
         </Typography>
       </Box>
+
       {/* Logout Section */}
       <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
         <Typography
@@ -572,7 +574,8 @@ const Layout = ({ children }) => {
         display: 'flex', 
         flexDirection: 'column', 
         width: '100vw', 
-        overflowX: 'hidden' 
+        height: '100vh',
+        overflow: 'hidden' // Prevent window scroll
       }}>
         <AppBar
           position="static"
@@ -580,7 +583,8 @@ const Layout = ({ children }) => {
           sx={{
             backgroundColor: 'background.paper',
             borderBottom: '1px solid',
-            borderBottomColor: 'divider'
+            borderBottomColor: 'divider',
+            flexShrink: 0
           }}
         >
           <Toolbar>
@@ -610,8 +614,9 @@ const Layout = ({ children }) => {
           sx={{
             flexGrow: 1,
             p: 3,
-            width: '100vw',
-            maxWidth: '100vw',
+            width: '100%',
+            height: 'calc(100vh - 64px)', // Subtract AppBar height
+            overflowY: 'auto', // Allow content to scroll internally
             overflowX: 'hidden'
           }}
         >
@@ -624,7 +629,9 @@ const Layout = ({ children }) => {
   return (
     <Box sx={{ 
       display: 'flex', 
-      minHeight: '100vh',
+      height: '100vh', // Fixed height
+      width: '100vw', // Fixed width
+      overflow: 'hidden', // Prevent window scroll
       position: 'relative'
     }}>
       {/* Mobile Sidebar */}
@@ -678,10 +685,11 @@ const Layout = ({ children }) => {
         flexGrow: 1,
         display: 'flex',
         flexDirection: 'column',
-        minHeight: '100vh',
+        height: '100vh', // Fixed height
         marginLeft: { xs: 0, sm: `${drawerWidth}px` },
         width: { xs: '100vw', sm: `calc(100vw - ${drawerWidth}px)` },
-        bgcolor: 'background.default'
+        bgcolor: 'background.default',
+        overflow: 'hidden' // Prevent content area from causing window scroll
       }}>
         <Navbar onMenuClick={handleDrawerToggle} />
         <Box sx={{
@@ -689,9 +697,9 @@ const Layout = ({ children }) => {
           px: { xs: 2, sm: 3 },
           pt: 3,
           pb: 3,
-          overflowY: 'auto',
+          overflowY: 'auto', // Allow internal scrolling for content
           overflowX: 'hidden',
-          height: 'calc(100vh - 64px)',
+          height: 'calc(100vh - 64px)', // Subtract navbar height
           width: '100%'
         }}>
           {children}
