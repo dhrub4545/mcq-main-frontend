@@ -163,7 +163,7 @@ const ProgressChart = ({ data, title, color, icon: Icon, theme }) => {
         flexDirection: 'column',
         m: { xs: '15px', md: 0 }, // 15px margin on all sides for mobile
         position: 'relative',
-        overflow: 'hidden',
+        overflow: { xs: 'visible', md: 'hidden' }, // FIXED: Allow overflow on mobile to prevent clipping
         '&:hover': !isMobile ? {
           transform: 'translateY(-4px)',
           boxShadow: theme.shadows[12],
@@ -180,7 +180,7 @@ const ProgressChart = ({ data, title, color, icon: Icon, theme }) => {
       }}
     >
       <CardContent sx={{
-        p: { xs: 0.5, md: 3 }, // MINIMAL PADDING ON MOBILE, NORMAL ON DESKTOP
+        p: { xs: 1.5, md: 3 }, // FIXED: Increased padding from 0.5 to 1.5 on mobile
         display: 'flex',
         flexDirection: 'column',
         gap: { xs: 1, md: 2 }
@@ -288,15 +288,19 @@ const ProgressChart = ({ data, title, color, icon: Icon, theme }) => {
             </Box>
 
             {/* Chart */}
-            <Box sx={{ width: '100%', height: { xs: 200, sm: 250, md: 300 } }}>
+            <Box sx={{ 
+              width: '100%', 
+              height: { xs: 200, sm: 250, md: 300 },
+              overflow: 'visible' // FIXED: Ensure chart container doesn't clip content
+            }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={data}
                   margin={{
-                    top: isMobile ? 20 : 30,
-                    right: isMobile ? 5 : 30,
-                    left: 0,
-                    bottom: isMobile ? 5 : 20
+                    top: isMobile ? 30 : 30, // FIXED: Increased top margin for mobile labels
+                    right: isMobile ? 10 : 30, // FIXED: Increased right margin for mobile
+                    left: isMobile ? 5 : 0, // FIXED: Added left margin for mobile
+                    bottom: isMobile ? 10 : 20 // FIXED: Increased bottom margin for mobile
                   }}
                   onClick={handleAreaClick}
                 >
@@ -338,7 +342,7 @@ const ProgressChart = ({ data, title, color, icon: Icon, theme }) => {
                       fill: theme.palette.text.secondary,
                       fontWeight: 500
                     }}
-                    width={isMobile ? 25 : 40}
+                    width={isMobile ? 30 : 40} // FIXED: Increased width for mobile Y-axis
                     tickFormatter={(value) => `${value}%`}
                   />
 
