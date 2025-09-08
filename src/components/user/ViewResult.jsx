@@ -19,7 +19,8 @@ import {
   Fade,
   Grow,
   useTheme,
-  Avatar
+  Avatar,
+  useMediaQuery
 } from '@mui/material';
 import {
   Check as CheckIcon,
@@ -37,34 +38,48 @@ const ViewResult = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [results, setResults] = useState(null);
 
   useEffect(() => {
     if (location.state?.results) {
+      // Store results in localStorage to persist on reload
+      localStorage.setItem('currentQuizResults', JSON.stringify(location.state.results));
       setResults(location.state.results);
     } else {
-      navigate('/user/quiz');
+      // Try to get results from localStorage
+      const storedResults = localStorage.getItem('currentQuizResults');
+      if (storedResults) {
+        setResults(JSON.parse(storedResults));
+      } else {
+        // No results found, redirect to quiz
+        navigate('/user/quiz');
+      }
     }
   }, [location.state, navigate]);
+
+  // Clear stored results when component unmounts
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('currentQuizResults');
+    };
+  }, []);
 
   if (!results) {
     return (
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Fade in timeout={600}>
           <Card sx={{
-            p: 6,
+            p: { xs: 3, md: 6 },
             textAlign: 'center',
             background: theme.palette.mode === 'dark'
               ? 'linear-gradient(135deg, rgba(30,30,30,0.95) 0%, rgba(45,45,45,0.95) 100%)'
               : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
-            backdropFilter: 'blur(20px)',
-            border: `1px solid ${theme.palette.mode === 'dark' 
-              ? 'rgba(255,255,255,0.1)' 
-              : 'rgba(0,0,0,0.1)'}`,
+            border: `1px solid ${theme.palette.divider}`,
             borderRadius: 3,
           }}>
-            <QuizIcon sx={{ fontSize: 80, color: 'text.secondary', mb: 3, opacity: 0.5 }} />
-            <Typography variant="h5" gutterBottom fontWeight="600">
+            <QuizIcon sx={{ fontSize: { xs: 60, md: 80 }, color: 'text.secondary', mb: 2, opacity: 0.5 }} />
+            <Typography variant="h5" gutterBottom fontWeight="600" fontSize={{ xs: '1.25rem', md: '1.5rem' }}>
               No quiz results found
             </Typography>
             <Button
@@ -72,15 +87,13 @@ const ViewResult = () => {
               onClick={() => navigate('/user')}
               startIcon={<HomeIcon />}
               sx={{
-                mt: 3,
+                mt: 2,
                 background: 'linear-gradient(45deg, #6366f1 30%, #8b5cf6 90%)',
-                px: 4,
+                px: { xs: 2, md: 4 },
                 py: 1.5,
                 fontWeight: 600,
                 textTransform: 'none',
-                '&:hover': {
-                  background: 'linear-gradient(45deg, #4f46e5 30%, #7c3aed 90%)',
-                }
+                fontSize: { xs: '0.9rem', md: '1rem' }
               }}
             >
               Return to Dashboard
@@ -116,196 +129,190 @@ const ViewResult = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 4 } }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 1, sm: 2, md: 4 }, px: { xs: 1, md: 3 } }}>
       <Fade in timeout={600}>
         <Box>
-          {/* Enhanced Results Header */}
+          {/* Results Header - Optimized for Mobile */}
           <Paper 
             elevation={0}
             sx={{ 
-              p: { xs: 3, sm: 5 }, 
-              mb: 4,
+              p: { xs: 2, sm: 3, md: 5 }, 
+              mb: { xs: 2, md: 4 },
               background: theme.palette.mode === 'dark'
                 ? 'linear-gradient(135deg, rgba(30,30,30,0.95) 0%, rgba(45,45,45,0.95) 100%)'
                 : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
-              backdropFilter: 'blur(20px)',
-              border: `1px solid ${theme.palette.mode === 'dark' 
-                ? 'rgba(255,255,255,0.1)' 
-                : 'rgba(0,0,0,0.1)'}`,
-              borderRadius: 4,
-              position: 'relative',
-              overflow: 'hidden'
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: { xs: 2, md: 4 }
             }}
           >
-            <Box sx={{ position: 'relative', zIndex: 1 }}>
-              <Typography 
-                variant="h3" 
-                gutterBottom 
-                align="center" 
-                sx={{
-                  fontWeight: 700,
-                  background: theme.palette.mode === 'dark'
-                    ? 'linear-gradient(45deg, #bb86fc 30%, #03dac6 90%)'
-                    : 'linear-gradient(45deg, #6366f1 30%, #8b5cf6 90%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
-                  mb: 2
+            <Typography 
+              variant="h3" 
+              gutterBottom 
+              align="center" 
+              sx={{
+                fontWeight: 700,
+                background: theme.palette.mode === 'dark'
+                  ? 'linear-gradient(45deg, #bb86fc 30%, #03dac6 90%)'
+                  : 'linear-gradient(45deg, #6366f1 30%, #8b5cf6 90%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                fontSize: { xs: '1.5rem', sm: '2rem', md: '3rem' },
+                mb: { xs: 1, md: 2 }
+              }}
+            >
+              Quiz Results
+            </Typography>
+
+            {/* Time Warning Alert */}
+            {results.timeUp && (
+              <Alert 
+                severity="warning" 
+                sx={{ 
+                  mb: { xs: 2, md: 4 },
+                  fontSize: { xs: '0.8rem', md: '0.875rem' },
+                  '& .MuiAlert-icon': {
+                    fontSize: { xs: '1rem', md: '1.25rem' }
+                  }
                 }}
               >
-                Quiz Results
+                <Box display="flex" alignItems="center" gap={1}>
+                  <TimerIcon sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }} />
+                  <Typography fontWeight="600" fontSize="inherit">
+                    Time ran out! Quiz was auto-submitted.
+                  </Typography>
+                </Box>
+              </Alert>
+            )}
+
+            {/* Quiz Info Section */}
+            <Box sx={{ textAlign: 'center', mb: { xs: 2, md: 4 } }}>
+              <Typography 
+                variant="h5" 
+                gutterBottom
+                sx={{ 
+                  fontWeight: 600,
+                  color: 'text.primary',
+                  mb: { xs: 2, md: 3 },
+                  fontSize: { xs: '1.1rem', sm: '1.3rem', md: '1.5rem' }
+                }}
+              >
+                {results.quizName}
               </Typography>
 
-              {/* Time Warning Alert */}
-              {results.timeUp && (
-                <Fade in timeout={800} style={{ transitionDelay: '200ms' }}>
-                  <Alert 
-                    severity="warning" 
-                    sx={{ 
-                      mb: 4,
-                      background: theme.palette.mode === 'dark'
-                        ? 'rgba(255, 193, 7, 0.1)'
-                        : 'rgba(255, 193, 7, 0.05)',
-                      border: `1px solid ${theme.palette.mode === 'dark'
-                        ? 'rgba(255, 193, 7, 0.3)'
-                        : 'rgba(255, 193, 7, 0.2)'}`,
-                      borderRadius: 2,
-                      backdropFilter: 'blur(10px)'
-                    }}
-                  >
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <TimerIcon />
-                      <Typography fontWeight="600">
-                        Time ran out! Quiz was auto-submitted.
-                      </Typography>
-                    </Box>
-                  </Alert>
-                </Fade>
-              )}
-
-              {/* Quiz Info Section */}
-              <Box sx={{ textAlign: 'center', mb: 4 }}>
-                <Typography 
-                  variant="h5" 
-                  gutterBottom
+              {/* Metadata Chips - Smaller for Mobile */}
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                gap: { xs: 0.5, sm: 1, md: 1.5 }, 
+                mb: { xs: 2, md: 4 }, 
+                flexWrap: 'wrap' 
+              }}>
+                <Chip 
+                  label={results.topic} 
+                  icon={<SchoolIcon sx={{ fontSize: { xs: '0.9rem', md: '1.25rem' } }} />}
                   sx={{ 
+                    backgroundColor: theme.palette.mode === 'dark' 
+                      ? 'rgba(103, 58, 183, 0.2)' 
+                      : 'rgba(103, 58, 183, 0.1)',
+                    color: '#673ab7',
                     fontWeight: 600,
-                    color: 'text.primary',
-                    mb: 3
+                    fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' },
+                    height: { xs: 24, md: 32 }
                   }}
-                >
-                  {results.quizName}
-                </Typography>
-
-                {/* Metadata Chips */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'center', 
-                  gap: 1.5, 
-                  mb: 4, 
-                  flexWrap: 'wrap' 
-                }}>
-                  <Chip 
-                    label={results.topic} 
-                    icon={<SchoolIcon />}
-                    sx={{ 
-                      backgroundColor: theme.palette.mode === 'dark' 
-                        ? 'rgba(103, 58, 183, 0.2)' 
-                        : 'rgba(103, 58, 183, 0.1)',
-                      color: '#673ab7',
-                      fontWeight: 600,
-                      fontSize: '0.9rem'
-                    }}
-                  />
-                  <Chip 
-                    label={results.difficulty} 
-                    sx={{ 
-                      backgroundColor: theme.palette.mode === 'dark' 
-                        ? 'rgba(255, 152, 0, 0.2)' 
-                        : 'rgba(255, 152, 0, 0.1)',
-                      color: '#ff9800',
-                      fontWeight: 600,
-                      fontSize: '0.9rem'
-                    }}
-                  />
-                  <Chip 
-                    label={`${results.score}/${results.total} Correct`}
-                    icon={<TrophyIcon />}
-                    sx={{ 
-                      backgroundColor: isPassing 
-                        ? theme.palette.mode === 'dark' 
-                          ? 'rgba(76, 175, 80, 0.2)' 
-                          : 'rgba(76, 175, 80, 0.1)'
-                        : theme.palette.mode === 'dark'
-                          ? 'rgba(244, 67, 54, 0.2)'
-                          : 'rgba(244, 67, 54, 0.1)',
-                      color: getScoreColor(),
-                      fontWeight: 600,
-                      fontSize: '0.9rem'
-                    }}
-                  />
-                </Box>
-                
-                {/* Score Display */}
-                <Box sx={{ position: 'relative', display: 'inline-block', mb: 3 }}>
-                  <Avatar
-                    sx={{
-                      width: { xs: 120, sm: 150 },
-                      height: { xs: 120, sm: 150 },
-                      mx: 'auto',
-                      mb: 2,
-                      background: `linear-gradient(45deg, ${getScoreColor()} 30%, ${getScoreColor()}aa 90%)`,
-                      fontSize: { xs: '1.5rem', sm: '2rem' },
-                      fontWeight: 700,
-                      border: `4px solid ${theme.palette.background.paper}`,
-                      boxShadow: theme.palette.mode === 'dark'
-                        ? `0 8px 32px ${getScoreColor()}33`
-                        : `0 8px 32px ${getScoreColor()}22`
-                    }}
-                  >
-                    {scorePercentage}%
-                  </Avatar>
-                </Box>
-                
-                <Typography 
-                  variant="h5" 
-                  sx={{ 
-                    color: getScoreColor(),
-                    fontWeight: 700,
-                    mb: 2,
-                    fontSize: { xs: '1.25rem', sm: '1.5rem' }
-                  }}
-                >
-                  {getScoreEmoji()} {getScoreMessage()}
-                </Typography>
-                
-                {/* Enhanced Progress Bar */}
-                <LinearProgress 
-                  variant="determinate" 
-                  value={scorePercentage} 
-                  sx={{ 
-                    height: 12, 
-                    borderRadius: 6, 
-                    mb: 3,
-                    background: theme.palette.mode === 'dark' 
-                      ? 'rgba(255,255,255,0.1)' 
-                      : 'rgba(0,0,0,0.1)',
-                    '& .MuiLinearProgress-bar': {
-                      background: `linear-gradient(45deg, ${getScoreColor()} 30%, ${getScoreColor()}dd 90%)`,
-                      borderRadius: 6
-                    }
-                  }} 
                 />
-                
-                <Typography variant="body2" color="text.secondary" fontWeight="500">
-                  Completed on {new Date(results.date).toLocaleDateString()} at {new Date(results.date).toLocaleTimeString()}
-                </Typography>
+                <Chip 
+                  label={results.difficulty} 
+                  sx={{ 
+                    backgroundColor: theme.palette.mode === 'dark' 
+                      ? 'rgba(255, 152, 0, 0.2)' 
+                      : 'rgba(255, 152, 0, 0.1)',
+                    color: '#ff9800',
+                    fontWeight: 600,
+                    fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' },
+                    height: { xs: 24, md: 32 }
+                  }}
+                />
+                <Chip 
+                  label={`${results.score}/${results.total} Correct`}
+                  icon={<TrophyIcon sx={{ fontSize: { xs: '0.9rem', md: '1.25rem' } }} />}
+                  sx={{ 
+                    backgroundColor: isPassing 
+                      ? theme.palette.mode === 'dark' 
+                        ? 'rgba(76, 175, 80, 0.2)' 
+                        : 'rgba(76, 175, 80, 0.1)'
+                      : theme.palette.mode === 'dark'
+                        ? 'rgba(244, 67, 54, 0.2)'
+                        : 'rgba(244, 67, 54, 0.1)',
+                    color: getScoreColor(),
+                    fontWeight: 600,
+                    fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' },
+                    height: { xs: 24, md: 32 }
+                  }}
+                />
               </Box>
+              
+              {/* Score Display - Smaller for Mobile */}
+              <Box sx={{ mb: { xs: 2, md: 3 } }}>
+                <Avatar
+                  sx={{
+                    width: { xs: 80, sm: 100, md: 150 },
+                    height: { xs: 80, sm: 100, md: 150 },
+                    mx: 'auto',
+                    mb: { xs: 1, md: 2 },
+                    background: `linear-gradient(45deg, ${getScoreColor()} 30%, ${getScoreColor()}aa 90%)`,
+                    fontSize: { xs: '1.1rem', sm: '1.3rem', md: '2rem' },
+                    fontWeight: 700,
+                    border: `3px solid ${theme.palette.background.paper}`,
+                    boxShadow: `0 4px 20px ${getScoreColor()}33`
+                  }}
+                >
+                  {scorePercentage}%
+                </Avatar>
+              </Box>
+              
+              <Typography 
+                variant="h5" 
+                sx={{ 
+                  color: getScoreColor(),
+                  fontWeight: 700,
+                  mb: { xs: 1, md: 2 },
+                  fontSize: { xs: '1rem', sm: '1.1rem', md: '1.5rem' }
+                }}
+              >
+                {getScoreEmoji()} {getScoreMessage()}
+              </Typography>
+              
+              {/* Progress Bar - Smaller for Mobile */}
+              <LinearProgress 
+                variant="determinate" 
+                value={scorePercentage} 
+                sx={{ 
+                  height: { xs: 6, md: 12 }, 
+                  borderRadius: 3, 
+                  mb: { xs: 2, md: 3 },
+                  background: theme.palette.mode === 'dark' 
+                    ? 'rgba(255,255,255,0.1)' 
+                    : 'rgba(0,0,0,0.1)',
+                  '& .MuiLinearProgress-bar': {
+                    background: `linear-gradient(45deg, ${getScoreColor()} 30%, ${getScoreColor()}dd 90%)`,
+                    borderRadius: 3
+                  }
+                }} 
+              />
+              
+              <Typography 
+                variant="body2" 
+                color="text.secondary" 
+                fontWeight="500"
+                sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}
+              >
+                Completed on {new Date(results.date).toLocaleDateString()} at {new Date(results.date).toLocaleTimeString()}
+              </Typography>
             </Box>
           </Paper>
 
-          {/* Enhanced Question Review Section */}
+          {/* Question Review Section - Optimized Accordion */}
           <Grow in timeout={1000} style={{ transitionDelay: '400ms' }}>
             <Paper
               elevation={0}
@@ -313,14 +320,9 @@ const ViewResult = () => {
                 background: theme.palette.mode === 'dark'
                   ? 'linear-gradient(135deg, rgba(30,30,30,0.95) 0%, rgba(45,45,45,0.95) 100%)'
                   : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
-                backdropFilter: 'blur(20px)',
-                border: `1px solid ${theme.palette.mode === 'dark' 
-                  ? 'rgba(255,255,255,0.1)' 
-                  : 'rgba(0,0,0,0.1)'}`,
-                borderRadius: 4,
-                p: { xs: 3, sm: 4 },
-                position: 'relative',
-                overflow: 'hidden'
+                border: `1px solid ${theme.palette.divider}`,
+                borderRadius: { xs: 2, md: 4 },
+                p: { xs: 1.5, sm: 2, md: 4 }
               }}
             >
               <Typography 
@@ -328,49 +330,49 @@ const ViewResult = () => {
                 gutterBottom
                 sx={{
                   fontWeight: 700,
-                  mb: 3,
-                  position: 'relative',
-                  zIndex: 1,
-                  fontSize: { xs: '1.5rem', sm: '2rem' }
+                  mb: { xs: 1.5, md: 3 },
+                  fontSize: { xs: '1.2rem', sm: '1.4rem', md: '2rem' }
                 }}
               >
                 📝 Question Review
               </Typography>
 
-              <List sx={{ position: 'relative', zIndex: 1 }}>
+              <List sx={{ p: 0 }}>
                 {results.answers.map((answer, index) => (
                   <Fade key={index} in timeout={800} style={{ transitionDelay: `${600 + index * 100}ms` }}>
                     <Accordion 
                       sx={{ 
-                        mb: 2,
+                        mb: { xs: 1, md: 2 },
                         background: theme.palette.mode === 'dark'
                           ? 'rgba(255,255,255,0.03)'
                           : 'rgba(0,0,0,0.02)',
-                        border: `1px solid ${theme.palette.mode === 'dark' 
-                          ? 'rgba(255,255,255,0.08)' 
-                          : 'rgba(0,0,0,0.08)'}`,
-                        borderRadius: 2,
+                        border: `1px solid ${theme.palette.divider}`,
+                        borderRadius: { xs: 1, md: 2 },
                         '&:hover': {
                           background: theme.palette.mode === 'dark'
                             ? 'rgba(255,255,255,0.05)'
                             : 'rgba(0,0,0,0.03)',
                         },
                         '&.Mui-expanded': {
-                          margin: '8px 0',
+                          margin: { xs: '4px 0', md: '8px 0' },
+                        },
+                        '& .MuiAccordionSummary-root': {
+                          minHeight: { xs: 48, md: 56 },
+                          py: { xs: 0.5, md: 1.5 },
+                          px: { xs: 1, md: 2 }
                         }
                       }}
                     >
                       <AccordionSummary 
-                        expandIcon={<ExpandMoreIcon />}
-                        sx={{ py: 1.5 }}
+                        expandIcon={<ExpandMoreIcon sx={{ fontSize: { xs: '1.2rem', md: '1.5rem' } }} />}
                       >
-                        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: { xs: 1, md: 2 } }}>
                           <Avatar
                             sx={{
-                              width: 32,
-                              height: 32,
+                              width: { xs: 24, md: 32 },
+                              height: { xs: 24, md: 32 },
                               bgcolor: answer.isCorrect ? 'success.main' : 'error.main',
-                              fontSize: '1rem'
+                              fontSize: { xs: '0.7rem', md: '1rem' }
                             }}
                           >
                             {answer.isCorrect ? <CheckIcon fontSize="small" /> : <CloseIcon fontSize="small" />}
@@ -378,55 +380,62 @@ const ViewResult = () => {
                           <Typography 
                             sx={{ 
                               fontWeight: 600,
-                              fontSize: { xs: '0.9rem', sm: '1rem' },
-                              flex: 1
+                              fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' },
+                              flex: 1,
+                              lineHeight: 1.3
                             }}
                           >
-                            Question {index + 1}: {answer.question.length > 60 
-                              ? `${answer.question.substring(0, 60)}...` 
+                            Q{index + 1}: {answer.question.length > (isMobile ? 40 : 60) 
+                              ? `${answer.question.substring(0, isMobile ? 40 : 60)}...` 
                               : answer.question}
                           </Typography>
                           <Chip
                             label={answer.isCorrect ? 'Correct' : 'Incorrect'}
                             color={answer.isCorrect ? 'success' : 'error'}
                             size="small"
-                            sx={{ fontWeight: 600 }}
+                            sx={{ 
+                              fontWeight: 600,
+                              fontSize: { xs: '0.65rem', md: '0.75rem' },
+                              height: { xs: 20, md: 24 }
+                            }}
                           />
                         </Box>
                       </AccordionSummary>
-                      <AccordionDetails sx={{ pt: 0 }}>
+                      <AccordionDetails sx={{ pt: 0, px: { xs: 1, md: 2 }, pb: { xs: 1, md: 2 } }}>
                         <Card 
                           variant="outlined" 
                           sx={{ 
                             background: theme.palette.mode === 'dark'
                               ? 'rgba(255,255,255,0.02)'
                               : 'rgba(0,0,0,0.01)',
-                            border: `1px solid ${theme.palette.mode === 'dark' 
-                              ? 'rgba(255,255,255,0.1)' 
-                              : 'rgba(0,0,0,0.1)'}`,
-                            borderRadius: 2
+                            border: `1px solid ${theme.palette.divider}`,
+                            borderRadius: { xs: 1, md: 2 }
                           }}
                         >
-                          <CardContent sx={{ p: 3 }}>
+                          <CardContent sx={{ p: { xs: 1.5, md: 3 } }}>
                             <Typography 
                               variant="h6" 
                               gutterBottom
                               sx={{ 
                                 fontWeight: 600,
                                 lineHeight: 1.4,
-                                fontSize: { xs: '1rem', sm: '1.25rem' }
+                                fontSize: { xs: '0.9rem', sm: '1rem', md: '1.25rem' },
+                                mb: { xs: 1, md: 2 }
                               }}
                             >
                               {answer.question}
                             </Typography>
                             
-                            <Divider sx={{ my: 2, opacity: 0.3 }} />
+                            <Divider sx={{ my: { xs: 1, md: 2 }, opacity: 0.3 }} />
                             
-                            <Box sx={{ mt: 2 }}>
+                            <Box sx={{ mt: { xs: 1, md: 2 } }}>
                               <Typography 
                                 variant="body1" 
                                 gutterBottom
-                                sx={{ fontWeight: 600 }}
+                                sx={{ 
+                                  fontWeight: 600,
+                                  fontSize: { xs: '0.8rem', md: '1rem' }
+                                }}
                               >
                                 Your answer:{' '}
                                 <Box 
@@ -434,11 +443,12 @@ const ViewResult = () => {
                                   sx={{ 
                                     color: answer.isCorrect ? 'success.main' : 'error.main',
                                     fontWeight: 700,
-                                    p: 0.5,
+                                    p: { xs: 0.25, md: 0.5 },
                                     borderRadius: 1,
                                     background: answer.isCorrect 
                                       ? 'rgba(76, 175, 80, 0.1)' 
-                                      : 'rgba(244, 67, 54, 0.1)'
+                                      : 'rgba(244, 67, 54, 0.1)',
+                                    fontSize: { xs: '0.8rem', md: '1rem' }
                                   }}
                                 >
                                   {answer.selected}
@@ -449,7 +459,10 @@ const ViewResult = () => {
                                 <Typography 
                                   variant="body1" 
                                   gutterBottom
-                                  sx={{ fontWeight: 600 }}
+                                  sx={{ 
+                                    fontWeight: 600,
+                                    fontSize: { xs: '0.8rem', md: '1rem' }
+                                  }}
                                 >
                                   Correct answer:{' '}
                                   <Box 
@@ -457,9 +470,10 @@ const ViewResult = () => {
                                     sx={{ 
                                       color: 'success.main',
                                       fontWeight: 700,
-                                      p: 0.5,
+                                      p: { xs: 0.25, md: 0.5 },
                                       borderRadius: 1,
-                                      background: 'rgba(76, 175, 80, 0.1)'
+                                      background: 'rgba(76, 175, 80, 0.1)',
+                                      fontSize: { xs: '0.8rem', md: '1rem' }
                                     }}
                                   >
                                     {answer.correct}
@@ -477,37 +491,32 @@ const ViewResult = () => {
             </Paper>
           </Grow>
 
-          {/* Enhanced Action Buttons */}
+          {/* Action Buttons - Optimized for Mobile */}
           <Fade in timeout={1200} style={{ transitionDelay: '800ms' }}>
             <Box 
               sx={{ 
                 display: 'flex', 
-                gap: 2, 
+                gap: { xs: 1, sm: 2 }, 
                 justifyContent: 'center', 
-                mt: 4,
+                mt: { xs: 2, md: 4 },
                 flexDirection: { xs: 'column', sm: 'row' },
-                alignItems: 'stretch'
+                px: { xs: 1, md: 0 }
               }}
             >
               <Button
                 variant="contained"
                 onClick={() => navigate('/')}
-                startIcon={<HomeIcon />}
+                startIcon={<HomeIcon sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }} />}
                 sx={{
                   background: 'linear-gradient(45deg, #ff4081 30%, #f50057 90%)',
-                  px: { xs: 3, sm: 4 },
-                  py: 1.5,
-                  fontSize: '1rem',
+                  px: { xs: 2, sm: 3, md: 4 },
+                  py: { xs: 1, md: 1.5 },
+                  fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem' },
                   fontWeight: 700,
                   textTransform: 'none',
-                  minWidth: { xs: '100%', sm: 180 },
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  minWidth: { xs: '100%', sm: 160, md: 180 },
                   '&:hover': {
                     background: 'linear-gradient(45deg, #f50057 30%, #c51162 90%)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: theme.palette.mode === 'dark'
-                      ? '0 8px 25px rgba(255, 64, 129, 0.4)'
-                      : '0 8px 25px rgba(255, 64, 129, 0.35)',
                   }
                 }}
               >
@@ -517,23 +526,16 @@ const ViewResult = () => {
               <Button
                 variant="outlined"
                 onClick={() => navigate('/user/history')}
-                startIcon={<HistoryIcon />}
+                startIcon={<HistoryIcon sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }} />}
                 sx={{
-                  px: { xs: 3, sm: 4 },
-                  py: 1.5,
-                  fontSize: '1rem',
+                  px: { xs: 2, sm: 3, md: 4 },
+                  py: { xs: 1, md: 1.5 },
+                  fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem' },
                   fontWeight: 600,
                   textTransform: 'none',
-                  minWidth: { xs: '100%', sm: 160 },
+                  minWidth: { xs: '100%', sm: 140, md: 160 },
                   borderColor: theme.palette.mode === 'dark' ? '#bb86fc' : '#6366f1',
                   color: theme.palette.mode === 'dark' ? '#bb86fc' : '#6366f1',
-                  '&:hover': {
-                    borderColor: theme.palette.mode === 'dark' ? '#bb86fc' : '#4f46e5',
-                    backgroundColor: theme.palette.mode === 'dark' 
-                      ? 'rgba(187, 134, 252, 0.08)' 
-                      : 'rgba(99, 102, 241, 0.08)',
-                    transform: 'translateY(-1px)',
-                  }
                 }}
               >
                 View History
@@ -542,23 +544,16 @@ const ViewResult = () => {
               <Button
                 variant="outlined"
                 onClick={() => navigate('/user/quiz')}
-                startIcon={<QuizIcon />}
+                startIcon={<QuizIcon sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }} />}
                 sx={{
-                  px: { xs: 3, sm: 4 },
-                  py: 1.5,
-                  fontSize: '1rem',
+                  px: { xs: 2, sm: 3, md: 4 },
+                  py: { xs: 1, md: 1.5 },
+                  fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem' },
                   fontWeight: 600,
                   textTransform: 'none',
-                  minWidth: { xs: '100%', sm: 180 },
+                  minWidth: { xs: '100%', sm: 160, md: 180 },
                   borderColor: theme.palette.mode === 'dark' ? '#03dac6' : '#4caf50',
                   color: theme.palette.mode === 'dark' ? '#03dac6' : '#4caf50',
-                  '&:hover': {
-                    borderColor: theme.palette.mode === 'dark' ? '#03dac6' : '#2e7d32',
-                    backgroundColor: theme.palette.mode === 'dark' 
-                      ? 'rgba(3, 218, 198, 0.08)' 
-                      : 'rgba(76, 175, 80, 0.08)',
-                    transform: 'translateY(-1px)',
-                  }
                 }}
               >
                 Take Another Quiz
