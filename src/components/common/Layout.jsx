@@ -613,7 +613,7 @@ const Layout = ({ children }) => {
         <Box
           sx={{
             flexGrow: 1,
-            p: 3,
+            p: 0, // REMOVED MOBILE MARGIN/PADDING
             width: '100%',
             height: 'calc(100vh - 64px)', // Subtract AppBar height
             overflowY: 'auto', // Allow content to scroll internally
@@ -694,9 +694,9 @@ const Layout = ({ children }) => {
         <Navbar onMenuClick={handleDrawerToggle} />
         <Box sx={{
           flexGrow: 1,
-          px: { xs: 2, sm: 3 },
-          pt: 3,
-          pb: 3,
+          px: { xs: 0, sm: 3 }, // REMOVED MOBILE HORIZONTAL PADDING
+          pt: { xs: 0, sm: 3 }, // REMOVED MOBILE TOP PADDING  
+          pb: { xs: 0, sm: 3 }, // REMOVED MOBILE BOTTOM PADDING
           overflowY: 'auto', // Allow internal scrolling for content
           overflowX: 'hidden',
           height: 'calc(100vh - 64px)', // Subtract navbar height
