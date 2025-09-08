@@ -10,7 +10,7 @@ import QuizIcon from '@mui/icons-material/Quiz';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 
 // Import components - keep StatsCard and EmptyState as regular imports since they're lightweight
-import StatsCard from './StatsCard';
+import StatsCard from './statscard';
 import EmptyState from './EmptyState';
 
 // Lazy load heavy components
