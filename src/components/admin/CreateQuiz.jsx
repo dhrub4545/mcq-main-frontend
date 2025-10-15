@@ -203,6 +203,7 @@ Only return a valid JSON array, no other text or markdown.`;
 
       const quizToSave = {
         ...quizData,
+        questionCount: acceptedQuestions.length,
         questions: acceptedQuestions
       };
 
