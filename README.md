@@ -34,7 +34,7 @@
 | Repository | Role | Core Technology | Link |
 | :--- | :--- | :--- | :--- |
 | **mcq-main-frontend** (This Repo) | Production Web Exam Center & Analytics Portal | React 19 / Vite / Recharts / Vercel Host | [mcq-main-frontend](file:///c:/Users/pandi/OneDrive/Desktop/github/mcq-main-frontend) |
-| **quiz-Generator--main** | Primary Enterprise Backend Engine & Full-Stack Suite | React 19 / Express 5 / MongoDB / Gemini 2.5 Flash | [quiz-Generator--main](file:///c:/Users/pandi/OneDrive/Desktop/github/quiz-Generator--main) |
+| **quiz-Generator--main** | Primary Enterprise Backend Engine & Full-Stack Suite | React 19 / Express 5 / MongoDB / Gemini 3.8 Flash | [quiz-Generator--main](file:///c:/Users/pandi/OneDrive/Desktop/github/quiz-Generator--main) |
 | **quiz-Generator-** | Foundational AI MCQ Algorithmic Core Prototype | Express / Google Generative AI / Vite Prototype | [quiz-Generator-](file:///c:/Users/pandi/OneDrive/Desktop/github/quiz-Generator-) |
 | **DCP-QUIZZY** | Medical Mobile App Client & Licensing Engine | React Native / Expo 57 / Express / MongoDB | [DCP-QUIZZY](file:///c:/Users/pandi/OneDrive/Desktop/github/DCP-QUIZZY) |
 
@@ -111,7 +111,7 @@ flowchart TD
         AuthService["Authentication & Profile Service"]
         QuizService["Quiz Bank & Question Ingestion"]
         HistoryService["Test History & Attempt Analytics"]
-        AIService["Gemini 2.5 Flash MCQ Generator"]
+        AIService["Gemini 3.8 Flash MCQ Generator"]
         Database[("MongoDB Atlas Cloud Storage")]
     end
 
