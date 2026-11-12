@@ -15,13 +15,15 @@ import {
   IconButton,
   Divider,
   Stack,
-  Grid
+  Grid,
+  Chip
 } from '@mui/material';
 import { 
   Visibility, 
   VisibilityOff,
   PersonAdd,
-  Login as LoginIcon
+  Login as LoginIcon,
+  CloudQueue
 } from '@mui/icons-material';
 
 const Register = () => {
@@ -102,9 +104,40 @@ const Register = () => {
           Create Account
         </Typography>
         
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: 'center' }}>
           Join us today! Fill in the details below to get started
         </Typography>
+
+        {/* Free Tier Server Inactivity Notice */}
+        <Alert 
+          severity="info" 
+          icon={<CloudQueue fontSize="inherit" />}
+          sx={{ 
+            width: '100%', 
+            mb: 2, 
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: 'info.light',
+            textAlign: 'left',
+            '& .MuiAlert-message': { width: '100%' }
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.85rem' }}>
+              Free Server Notice
+            </Typography>
+            <Chip 
+              label="Render Free Tier" 
+              size="small" 
+              color="info" 
+              variant="outlined" 
+              sx={{ height: 18, fontSize: '0.68rem', fontWeight: 600 }} 
+            />
+          </Box>
+          <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', lineHeight: 1.45, fontSize: '0.78rem' }}>
+            Our backend runs on a free cloud instance that spins down during inactivity. If the server is sleeping, <strong>account creation may take 30–50 seconds</strong> to establish the initial connection.
+          </Typography>
+        </Alert>
 
         {error && (
           <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
